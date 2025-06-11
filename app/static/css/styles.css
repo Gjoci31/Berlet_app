@@ -1,6 +1,6 @@
 .login-background {
     background-image: url('/static/images/kettlebell-bg.jpg');
-    background-size: 1000px;  /* smaller background image */
+    background-size: 500px;  /* smaller background image */
     background-position: center;
     background-repeat: no-repeat;
 }
