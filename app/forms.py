@@ -1,6 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import (StringField, DateField, IntegerField, SubmitField,
-                     SelectField, TextAreaField)
+from wtforms import (
+    StringField,
+    PasswordField,
+    DateField,
+    IntegerField,
+    SubmitField,
+    SelectField,
+    TextAreaField,
+)
 from wtforms.validators import DataRequired, NumberRange
 
 class PassForm(FlaskForm):
@@ -19,3 +26,9 @@ class UserForm(FlaskForm):
     password = StringField('Jelszó', validators=[DataRequired()])
     role = SelectField('Szerep', choices=[('user', 'User'), ('admin', 'Admin')], validators=[DataRequired()])
     submit = SubmitField('Mentés')
+
+
+class LoginForm(FlaskForm):
+    username = StringField('Felhasználónév', validators=[DataRequired()])
+    password = PasswordField('Jelszó', validators=[DataRequired()])
+    submit = SubmitField('Bejelentkezés')
