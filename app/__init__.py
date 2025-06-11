@@ -35,4 +35,10 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(admin_bp)
 
+    # Ensure the database and required tables exist. Without this, a new
+    # deployment would raise ``OperationalError`` when a route queries a
+    # table that hasn't been created yet, resulting in a 500 error.
+    with app.app_context():
+        db.create_all()
+
     return app
