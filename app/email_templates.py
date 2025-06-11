@@ -23,3 +23,8 @@ def pass_created_email(username: str, pass_type: str, start, end, total) -> str:
 def pass_deleted_email(username: str, pass_type: str, start, end, used) -> str:
     content = f"Törölt bérlet: {pass_type}<br>{start} - {end}<br>Felhasználva: {used} alkalom"
     return base_email_template("Bérlet törölve", content)
+
+
+def pass_used_email(username: str, pass_type: str, remaining: int) -> str:
+    content = f"Kedves {username},<br>Felhasználtál egy alkalmat a(z) {pass_type} bérletedből.<br>Hátralévő alkalmak: {remaining}."
+    return base_email_template("Bérlet használat", content)

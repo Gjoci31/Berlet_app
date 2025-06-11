@@ -11,4 +11,4 @@ def dashboard():
         passes = Pass.query.all()
     else:
         passes = Pass.query.filter_by(user_id=current_user.id).all()
-    return render_template('dashboard.html', passes=passes)
+    return render_template('dashboard.html', passes=passes, user=current_user)
