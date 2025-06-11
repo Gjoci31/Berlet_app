@@ -8,10 +8,10 @@
 .pass-card {
     background-color: #000;
     background-image: url('/static/images/kettlebell-bg.jpg');
-    background-size: auto 100%;
-    background-position: right;
+    background-size: auto 80%;
+    background-position: bottom-right;
     background-repeat: no-repeat;
-    color: #FFC0CB; /* Hex kód a világoskékhez */
+    color: #FFFFFF;
     font-size: 1.5rem;
     font-weight: bold;
 }
