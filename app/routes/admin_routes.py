@@ -194,6 +194,38 @@ def create_user():
     return render_template('create_user.html', form=form)
 
 
+@admin_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def edit_user(user_id):
+    """Modify an existing user's details and password."""
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    form = UserForm(obj=user)
+    if request.method == 'GET':
+        form.password.data = ''
+
+    if form.validate_on_submit():
+        # Ensure unique email and username when editing
+        if User.query.filter(User.id != user_id, User.email == form.email.data).first():
+            flash("Az email cím már használatban van.", "danger")
+            return render_template("edit_user.html", form=form)
+        if User.query.filter(User.id != user_id, User.username == form.username.data).first():
+            flash("A felhasználónév már foglalt.", "danger")
+            return render_template("edit_user.html", form=form)
+
+        user.username = form.username.data
+        user.email = form.email.data
+        user.role = form.role.data
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash("Felhasználó módosítva.", "success")
+        return redirect(url_for('admin.users'))
+
+    return render_template('edit_user.html', form=form)
+
+
 @admin_bp.route('/delete_user/<int:user_id>')
 @login_required
 def delete_user(user_id):
