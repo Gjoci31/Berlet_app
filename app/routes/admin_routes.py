@@ -1,5 +1,17 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    request,
+    flash,
+    send_file,
+    current_app,
+)
 from flask_login import login_required, current_user
+import os
+import shutil
+
 from ..models import Pass, User, db, EmailSettings
 from ..forms import PassForm, UserForm, EmailSettingsForm
 from ..utils import send_event_email
@@ -268,3 +280,42 @@ def email_settings():
         return redirect(url_for('user.dashboard'))
 
     return render_template('email_settings.html', form=form)
+
+
+@admin_bp.route('/backup')
+@login_required
+def backup():
+    """Download a backup of the database file."""
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    instance_dir = os.path.abspath(os.path.join(current_app.root_path, '..', 'instance'))
+    db_file = os.path.join(instance_dir, 'passes.db')
+    if not os.path.exists(db_file):
+        flash('Nincs adatbázis a mentéshez.', 'danger')
+        return redirect(url_for('admin.email_settings'))
+
+    return send_file(db_file, as_attachment=True, download_name='passes_backup.db')
+
+
+@admin_bp.route('/restore', methods=['GET', 'POST'])
+@login_required
+def restore():
+    """Restore the database from an uploaded backup file."""
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    if request.method == 'POST':
+        uploaded = request.files.get('backup_file')
+        if uploaded:
+            instance_dir = os.path.abspath(os.path.join(current_app.root_path, '..', 'instance'))
+            os.makedirs(instance_dir, exist_ok=True)
+            db_file = os.path.join(instance_dir, 'passes.db')
+            db.session.remove()
+            db.engine.dispose()
+            uploaded.save(db_file)
+            flash('Adatbázis visszaállítva.', 'success')
+            return redirect(url_for('admin.email_settings'))
+        flash('Nem megfelelő fájl.', 'danger')
+
+    return render_template('restore.html')
