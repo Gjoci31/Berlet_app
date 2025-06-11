@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Bérlet ellenőrzése</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-body">
+                <h4>Bérlet adatai</h4>
+                <p><strong>Típus:</strong> {{ p.type }}</p>
+                <p><strong>Érvényesség:</strong> {{ p.start_date }} – {{ p.end_date }}</p>
+                <p><strong>Felhasznált alkalmak:</strong> {{ p.used }} / {{ p.total_uses }}</p>
+                <p><strong>Felhasználó:</strong> {{ p.user.username }}</p>
+                {% if p.end_date < today or p.used >= p.total_uses %}
+                    <div class="alert alert-danger">❌ A bérlet lejárt vagy kimerült.</div>
+                {% else %}
+                    <div class="alert alert-success">✅ A bérlet érvényes.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
