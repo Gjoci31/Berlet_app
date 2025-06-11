@@ -16,15 +16,32 @@ def registration_email(username: str, password: str) -> str:
     content = f"Kedves {username},<br><br>Felhasználónév: {username}<br>Jelszó: {password}<br>"
     return base_email_template("Fiók létrehozva", content)
 
-def pass_created_email(username: str, pass_type: str, start, end, total) -> str:
-    content = f"Bérlet típusa: {pass_type}<br>Érvényesség: {start} - {end}<br>Alkalmak: {total}"
-    return base_email_template("Új bérlet létrehozva", content)
+def _pass_details(p) -> str:
+    """Return a HTML snippet describing the given ``Pass``."""
+    comment = f"<br>Megjegyzés: {p.comment}" if p.comment else ""
+    return (
+        f"Bérlet típusa: {p.type}<br>"
+        f"Érvényesség: {p.start_date} - {p.end_date}<br>"
+        f"Felhasználás: {p.used}/{p.total_uses}{comment}"
+    )
+
+
+def pass_created_email(p) -> str:
+    """Return the email HTML for a newly created pass."""
+    return base_email_template("Új bérlet létrehozva", _pass_details(p))
 
 def pass_deleted_email(username: str, pass_type: str, start, end, used) -> str:
     content = f"Törölt bérlet: {pass_type}<br>{start} - {end}<br>Felhasználva: {used} alkalom"
     return base_email_template("Bérlet törölve", content)
 
 
-def pass_used_email(username: str, pass_type: str, remaining: int) -> str:
-    content = f"Kedves {username},<br>Felhasználtál egy alkalmat a(z) {pass_type} bérletedből.<br>Hátralévő alkalmak: {remaining}."
+def pass_used_email(p) -> str:
+    """Return the email HTML when a pass usage changes."""
+    remaining = p.total_uses - p.used
+    content = (
+        f"Kedves {p.user.username},<br>"
+        f"Felhasználtál egy alkalmat a(z) {p.type} bérletedből.<br>"
+        f"Hátralévő alkalmak: {remaining}.<br><br>"
+        f"{_pass_details(p)}"
+    )
     return base_email_template("Bérlet használat", content)
