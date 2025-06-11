@@ -1,9 +1,15 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from ..models import Pass, User, db
-from ..forms import PassForm, UserForm
-from ..utils import send_email
-from ..email_templates import pass_created_email, pass_deleted_email, pass_used_email
+from ..models import Pass, User, db, EmailSettings
+from ..forms import PassForm, UserForm, EmailSettingsForm
+from ..utils import send_event_email
+from ..email_templates import (
+    pass_created_email,
+    pass_deleted_email,
+    pass_used_email,
+    registration_email,
+    base_email_template,
+)
 from datetime import date
 
 admin_bp = Blueprint('admin', __name__)
@@ -30,8 +36,9 @@ def create_pass():
         )
         db.session.add(new_pass)
         db.session.commit()
-        send_email(
-            "Új bérlet", 
+        send_event_email(
+            'pass_created',
+            "Új bérlet",
             pass_created_email(new_pass.user.username, new_pass.type, new_pass.start_date, new_pass.end_date, new_pass.total_uses),
             new_pass.user.email
         )
@@ -87,7 +94,8 @@ def delete_pass(pass_id):
 
     db.session.delete(selected_pass)
     db.session.commit()
-    send_email(
+    send_event_email(
+        'pass_deleted',
         "Bérlet törölve",
         pass_deleted_email(user_name, pass_type, start_date, end_date, used),
         user_email,
@@ -118,7 +126,8 @@ def use_pass(pass_id):
         p.used += 1
         db.session.commit()
         remaining = p.total_uses - p.used
-        send_email(
+        send_event_email(
+            'pass_used',
             "Bérlet használat",
             pass_used_email(p.user.username, p.type, remaining),
             p.user.email,
@@ -164,6 +173,12 @@ def create_user():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
+        send_event_email(
+            'user_created',
+            "Felhasználó létrehozva",
+            registration_email(user.username, form.password.data),
+            user.email,
+        )
         flash("Felhasználó létrehozva.", "success")
         return redirect(url_for('admin.users'))
 
@@ -178,5 +193,33 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
+    send_event_email(
+        'user_deleted',
+        "Felhasználó törölve",
+        base_email_template("Felhasználó törölve", f"{user.username} törölve."),
+        user.email,
+    )
     flash("Felhasználó törölve.", "success")
     return redirect(url_for('admin.users'))
+
+
+@admin_bp.route('/email_settings', methods=['GET', 'POST'])
+@login_required
+def email_settings():
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    settings = EmailSettings.query.first()
+    if not settings:
+        settings = EmailSettings()
+        db.session.add(settings)
+        db.session.commit()
+
+    form = EmailSettingsForm(obj=settings)
+    if form.validate_on_submit():
+        form.populate_obj(settings)
+        db.session.commit()
+        flash("Beállítások mentve.", "success")
+        return redirect(url_for('user.dashboard'))
+
+    return render_template('email_settings.html', form=form)

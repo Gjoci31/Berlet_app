@@ -32,3 +32,25 @@ class Pass(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+class EmailSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email_from = db.Column(db.String(150))
+    email_password = db.Column(db.String(150))
+
+    user_created_enabled = db.Column(db.Boolean, default=False)
+    user_created_text = db.Column(db.Text)
+
+    user_deleted_enabled = db.Column(db.Boolean, default=False)
+    user_deleted_text = db.Column(db.Text)
+
+    pass_created_enabled = db.Column(db.Boolean, default=False)
+    pass_created_text = db.Column(db.Text)
+
+    pass_deleted_enabled = db.Column(db.Boolean, default=False)
+    pass_deleted_text = db.Column(db.Text)
+
+    pass_used_enabled = db.Column(db.Boolean, default=False)
+    pass_used_text = db.Column(db.Text)
+
