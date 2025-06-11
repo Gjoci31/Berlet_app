@@ -39,7 +39,7 @@ def create_pass():
         send_event_email(
             'pass_created',
             "Új bérlet",
-            pass_created_email(new_pass.user.username, new_pass.type, new_pass.start_date, new_pass.end_date, new_pass.total_uses),
+            pass_created_email(new_pass),
             new_pass.user.email
         )
         flash("Bérlet sikeresen létrehozva.", "success")
@@ -68,7 +68,7 @@ def extend_pass(pass_id):
         db.session.commit()
         send_email(
             "Bérlet hosszabbítva",
-            pass_created_email(p.user.username, p.type, p.start_date, p.end_date, p.total_uses),
+            pass_created_email(p),
             p.user.email,
         )
         flash("Bérlet módosítva.", "success")
@@ -125,11 +125,10 @@ def use_pass(pass_id):
     if p.used < p.total_uses and p.end_date >= date.today():
         p.used += 1
         db.session.commit()
-        remaining = p.total_uses - p.used
         send_event_email(
             'pass_used',
             "Bérlet használat",
-            pass_used_email(p.user.username, p.type, remaining),
+            pass_used_email(p),
             p.user.email,
         )
         flash("Alkalom hozzáadva.", "success")
