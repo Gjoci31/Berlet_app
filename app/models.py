@@ -25,6 +25,7 @@ class Pass(db.Model):
     end_date = db.Column(db.Date, nullable=False)
     total_uses = db.Column(db.Integer, nullable=False)
     used = db.Column(db.Integer, default=0)
+    comment = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 

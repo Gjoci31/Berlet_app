@@ -17,7 +17,30 @@
     </nav>
     <div class="container mt-5">
         <h2>Üdvözlünk, {{ user.username }}!</h2>
-        <!-- Szűrő és kártyák a Python kódban kezelve -->
+        {% if user.role == 'admin' %}
+        <div class="mb-3">
+            <a href="{{ url_for('admin.create_pass') }}" class="btn btn-success btn-sm">Új bérlet</a>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-primary btn-sm">Felhasználók</a>
+        </div>
+        {% endif %}
+        <div class="row">
+        {% for p in passes %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ p.type }}</h5>
+                        <p class="card-text">{{ p.start_date }} - {{ p.end_date }}</p>
+                        <p class="card-text">Alkalmak: {{ p.used }} / {{ p.total_uses }}</p>
+                        {% if p.comment %}<p class="card-text"><small>{{ p.comment }}</small></p>{% endif %}
+                        {% if user.role == 'admin' %}
+                            <a href="{{ url_for('admin.verify_pass', pass_id=p.id) }}" class="btn btn-sm btn-warning">Ellenőrzés</a>
+                            <a href="{{ url_for('admin.delete_pass', pass_id=p.id) }}" class="btn btn-sm btn-danger">Törlés</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
     </div>
 </body>
 </html>
