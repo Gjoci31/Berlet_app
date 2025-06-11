@@ -5,6 +5,8 @@ import smtplib
 from email.message import EmailMessage
 import os
 import logging
+from .email_templates import base_email_template
+from .models import EmailSettings
 
 def generate_qr_code(data: str) -> str:
     qr = qrcode.QRCode(version=1, box_size=6, border=2)
@@ -28,13 +30,19 @@ def send_email(subject, html_content, to_email):
 
     msg = EmailMessage()
     msg['Subject'] = subject
-    msg['From'] = os.getenv('EMAIL_FROM')
+    settings = EmailSettings.query.first()
+    email_from = os.getenv('EMAIL_FROM')
+    email_password = os.getenv('EMAIL_PASSWORD')
+    if settings:
+        if settings.email_from:
+            email_from = settings.email_from
+        if settings.email_password:
+            email_password = settings.email_password
+
+    msg['From'] = email_from
     msg['To'] = to_email
     msg.set_content("Ez egy HTML formátumú e-mail.")
     msg.add_alternative(html_content, subtype='html')
-
-    email_from = os.getenv('EMAIL_FROM')
-    email_password = os.getenv('EMAIL_PASSWORD')
 
     if not email_from or not email_password:
         logging.error('Email credentials are not configured.')
@@ -48,3 +56,25 @@ def send_email(subject, html_content, to_email):
     except Exception as exc:
         logging.error('Failed to send email: %s', exc)
         return False
+
+
+def send_event_email(event, subject, default_html, to_email):
+    settings = EmailSettings.query.first()
+    if settings:
+        mapping = {
+            'user_created': (settings.user_created_enabled, settings.user_created_text),
+            'user_deleted': (settings.user_deleted_enabled, settings.user_deleted_text),
+            'pass_created': (settings.pass_created_enabled, settings.pass_created_text),
+            'pass_deleted': (settings.pass_deleted_enabled, settings.pass_deleted_text),
+            'pass_used': (settings.pass_used_enabled, settings.pass_used_text),
+        }
+        enabled, custom_text = mapping.get(event, (False, None))
+        if not enabled:
+            return False
+        if custom_text:
+            html = base_email_template(subject, custom_text)
+        else:
+            html = default_html
+    else:
+        html = default_html
+    return send_email(subject, html, to_email)

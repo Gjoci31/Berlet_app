@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Email beállítások</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h3>Email beállítások</h3>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.email_from.label(class="form-label") }}
+            {{ form.email_from(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.email_password.label(class="form-label") }}
+            {{ form.email_password(class="form-control") }}
+        </div>
+        <hr>
+        <div class="form-check">
+            {{ form.user_created_enabled(class="form-check-input") }}
+            {{ form.user_created_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.user_created_text.label(class="form-label") }}
+            {{ form.user_created_text(class="form-control") }}
+        </div>
+        <div class="form-check">
+            {{ form.user_deleted_enabled(class="form-check-input") }}
+            {{ form.user_deleted_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.user_deleted_text.label(class="form-label") }}
+            {{ form.user_deleted_text(class="form-control") }}
+        </div>
+        <div class="form-check">
+            {{ form.pass_created_enabled(class="form-check-input") }}
+            {{ form.pass_created_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.pass_created_text.label(class="form-label") }}
+            {{ form.pass_created_text(class="form-control") }}
+        </div>
+        <div class="form-check">
+            {{ form.pass_deleted_enabled(class="form-check-input") }}
+            {{ form.pass_deleted_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.pass_deleted_text.label(class="form-label") }}
+            {{ form.pass_deleted_text(class="form-control") }}
+        </div>
+        <div class="form-check">
+            {{ form.pass_used_enabled(class="form-check-input") }}
+            {{ form.pass_used_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.pass_used_text.label(class="form-label") }}
+            {{ form.pass_used_text(class="form-control") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Vissza</a>
+    </form>
+</div>
+</body>
+</html>

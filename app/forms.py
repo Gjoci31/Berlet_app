@@ -7,6 +7,7 @@ from wtforms import (
     SubmitField,
     SelectField,
     TextAreaField,
+    BooleanField,
 )
 from wtforms.validators import DataRequired, NumberRange
 
@@ -32,3 +33,25 @@ class LoginForm(FlaskForm):
     username = StringField('Felhasználónév', validators=[DataRequired()])
     password = PasswordField('Jelszó', validators=[DataRequired()])
     submit = SubmitField('Bejelentkezés')
+
+
+class EmailSettingsForm(FlaskForm):
+    email_from = StringField('Feladó email')
+    email_password = PasswordField('Email jelszó')
+
+    user_created_enabled = BooleanField('Felhasználó létrehozásakor')
+    user_created_text = TextAreaField('Létrehozás üzenete')
+
+    user_deleted_enabled = BooleanField('Felhasználó törlésekor')
+    user_deleted_text = TextAreaField('Törlés üzenete')
+
+    pass_created_enabled = BooleanField('Új bérlet létrehozásakor')
+    pass_created_text = TextAreaField('Bérlet létrehozás üzenete')
+
+    pass_deleted_enabled = BooleanField('Bérlet törlésekor')
+    pass_deleted_text = TextAreaField('Bérlet törlés üzenete')
+
+    pass_used_enabled = BooleanField('Alkalom változásakor')
+    pass_used_text = TextAreaField('Alkalom változás üzenete')
+
+    submit = SubmitField('Mentés')
