@@ -13,7 +13,7 @@ import os
 import shutil
 
 from ..models import Pass, User, db, EmailSettings
-from ..forms import PassForm, UserForm, EmailSettingsForm
+from ..forms import PassForm, UserForm, EmailSettingsForm, RestoreForm
 from ..utils import send_event_email
 from ..email_templates import (
     pass_created_email,
@@ -305,8 +305,9 @@ def restore():
     if current_user.role != 'admin':
         return redirect(url_for('user.dashboard'))
 
-    if request.method == 'POST':
-        uploaded = request.files.get('backup_file')
+    form = RestoreForm()
+    if form.validate_on_submit():
+        uploaded = form.backup_file.data
         if uploaded:
             instance_dir = os.path.abspath(os.path.join(current_app.root_path, '..', 'instance'))
             os.makedirs(instance_dir, exist_ok=True)
@@ -318,4 +319,4 @@ def restore():
             return redirect(url_for('admin.email_settings'))
         flash('Nem megfelelő fájl.', 'danger')
 
-    return render_template('restore.html')
+    return render_template('restore.html', form=form)

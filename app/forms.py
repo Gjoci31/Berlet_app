@@ -8,6 +8,7 @@ from wtforms import (
     SelectField,
     TextAreaField,
     BooleanField,
+    FileField,
 )
 from wtforms.validators import DataRequired, NumberRange
 
@@ -55,3 +56,9 @@ class EmailSettingsForm(FlaskForm):
     pass_used_text = TextAreaField('Alkalom változás üzenete')
 
     submit = SubmitField('Mentés')
+
+
+class RestoreForm(FlaskForm):
+    """Form used for uploading a database backup to restore."""
+    backup_file = FileField('Backup fájl', validators=[DataRequired()])
+    submit = SubmitField('Visszaállítás')
