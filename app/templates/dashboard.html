@@ -31,9 +31,12 @@
                         <h5 class="card-title">{{ p.type }}</h5>
                         <p class="card-text">{{ p.start_date }} - {{ p.end_date }}</p>
                         <p class="card-text">Alkalmak: {{ p.used }} / {{ p.total_uses }}</p>
+                        {% if user.role == 'admin' %}
+                        <p class="card-text">Felhasználó: {{ p.user.username }}</p>
+                        {% endif %}
                         {% if p.comment %}<p class="card-text"><small>{{ p.comment }}</small></p>{% endif %}
                         {% if user.role == 'admin' %}
-                            <a href="{{ url_for('admin.verify_pass', pass_id=p.id) }}" class="btn btn-sm btn-warning">Ellenőrzés</a>
+                            <a href="{{ url_for('admin.verify_pass', pass_id=p.id) }}" class="btn btn-sm btn-warning">Szerkesztés</a>
                             <a href="{{ url_for('admin.delete_pass', pass_id=p.id) }}" class="btn btn-sm btn-danger">Törlés</a>
                         {% endif %}
                     </div>
