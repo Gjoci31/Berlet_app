@@ -1,5 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, IntegerField, SubmitField, SelectField
+from wtforms import (
+    StringField,
+    DateField,
+    IntegerField,
+    SubmitField,
+    SelectField,
+    PasswordField,
+)
 from wtforms.validators import DataRequired, NumberRange
 
 class PassForm(FlaskForm):
@@ -9,3 +16,9 @@ class PassForm(FlaskForm):
     total_uses = IntegerField('Alkalmak száma', validators=[DataRequired(), NumberRange(min=1)])
     user_id = SelectField('Felhasználó', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Bérlet létrehozása')
+
+
+class LoginForm(FlaskForm):
+    username = StringField('Felhasználónév', validators=[DataRequired()])
+    password = PasswordField('Jelszó', validators=[DataRequired()])
+    submit = SubmitField('Bejelentkezés')
