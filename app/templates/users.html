@@ -9,6 +9,7 @@
 <div class="container mt-5">
     <h3>Felhasználók</h3>
     <a href="{{ url_for('admin.create_user') }}" class="btn btn-success btn-sm mb-3">Új felhasználó</a>
+    <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary btn-sm mb-3">Visszalépés</a>
     <table class="table table-striped">
         <thead>
             <tr><th>ID</th><th>Név</th><th>Email</th><th>Szerep</th><th></th></tr>

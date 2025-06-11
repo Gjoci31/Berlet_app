@@ -17,6 +17,7 @@
         <div class="mb-3">{{ form.user_id.label }} {{ form.user_id(class="form-select") }}</div>
         <div class="mb-3">{{ form.comment.label }} {{ form.comment(class="form-control") }}</div>
         <div class="mb-3">{{ form.submit(class="btn btn-primary") }}</div>
+        <a href="{{ url_for('admin.verify_pass', pass_id=pass_id) }}" class="btn btn-secondary">Visszalépés</a>
     </form>
 </div>
 </body>

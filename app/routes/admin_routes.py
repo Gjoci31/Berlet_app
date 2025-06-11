@@ -67,7 +67,7 @@ def extend_pass(pass_id):
         flash("Bérlet módosítva.", "success")
         return redirect(url_for('admin.verify_pass', pass_id=p.id))
 
-    return render_template('extend_pass.html', form=form)
+    return render_template('extend_pass.html', form=form, pass_id=pass_id)
 
 @admin_bp.route('/delete_pass/<int:pass_id>')
 @login_required
