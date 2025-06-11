@@ -76,12 +76,21 @@ def delete_pass(pass_id):
         return redirect(url_for('user.dashboard'))
 
     selected_pass = Pass.query.get_or_404(pass_id)
+    # collect details before deleting because the instance will be detached from
+    # the session after deletion and commit
+    user_name = selected_pass.user.username
+    user_email = selected_pass.user.email
+    pass_type = selected_pass.type
+    start_date = selected_pass.start_date
+    end_date = selected_pass.end_date
+    used = selected_pass.used
+
     db.session.delete(selected_pass)
     db.session.commit()
     send_email(
         "Bérlet törölve",
-        pass_deleted_email(selected_pass.user.username, selected_pass.type, selected_pass.start_date, selected_pass.end_date, selected_pass.used),
-        selected_pass.user.email,
+        pass_deleted_email(user_name, pass_type, start_date, end_date, used),
+        user_email,
     )
     flash("Bérlet törölve.", "success")
     return redirect(url_for('user.dashboard'))
