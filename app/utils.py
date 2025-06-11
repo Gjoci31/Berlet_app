@@ -5,6 +5,7 @@ import smtplib
 from email.message import EmailMessage
 import os
 import logging
+import re
 from .email_templates import base_email_template
 from .models import EmailSettings
 
@@ -60,6 +61,14 @@ def send_email(subject, html_content, to_email):
 
 def send_event_email(event, subject, default_html, to_email):
     settings = EmailSettings.query.first()
+
+    def _extract_content(html: str) -> str:
+        """Return the text content from a ``base_email_template`` HTML string."""
+        match = re.search(r"<p[^>]*>(.*?)</p>", html, re.DOTALL)
+        return match.group(1) if match else ""
+
+    default_content = _extract_content(default_html)
+
     if settings:
         mapping = {
             'user_created': (settings.user_created_enabled, settings.user_created_text),
@@ -72,9 +81,11 @@ def send_event_email(event, subject, default_html, to_email):
         if not enabled:
             return False
         if custom_text:
-            html = base_email_template(subject, custom_text)
+            combined = f"{custom_text}<br><br>{default_content}"
+            html = base_email_template(subject, combined)
         else:
             html = default_html
     else:
         html = default_html
+
     return send_email(subject, html, to_email)
