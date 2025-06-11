@@ -5,6 +5,8 @@ from werkzeug.security import check_password_hash
 from ..forms import LoginForm, ForgotPasswordForm
 from ..utils import send_email
 from ..email_templates import forgot_password_email
+from .. import db
+import secrets
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -30,12 +32,18 @@ def forgot_password():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
+            password = user.password_plain
+            if not password:
+                password = secrets.token_urlsafe(8)
+                user.set_password(password)
+                db.session.commit()
             send_email(
                 "Elfelejtett jelszó",
-                forgot_password_email(user.username, user.password_plain),
+                forgot_password_email(user.username, password),
                 user.email,
             )
             flash('Jelszó elküldve az email címre.', 'success')
+            return redirect(url_for('auth.login'))
         else:
             flash('Nem található felhasználó ezzel az email címmel.', 'danger')
     return render_template('forgot_password.html', form=form)
