@@ -22,7 +22,9 @@
                 <td>{{ u.id }}</td><td>{{ u.username }}</td><td>{{ u.email }}</td><td>{{ u.role }}</td>
                 <td>
                     <a href="{{ url_for('admin.edit_user', user_id=u.id) }}" class="btn btn-primary btn-sm">Szerkesztés</a>
+                    {% if u.username != 'admin' %}
                     <a href="{{ url_for('admin.delete_user', user_id=u.id) }}" class="btn btn-danger btn-sm">Törlés</a>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
