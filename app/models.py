@@ -9,7 +9,11 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(150), nullable=False, unique=True)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(10), nullable=False, default='user')  # 'admin' or 'user'
-    passes = db.relationship('Pass', backref='user', lazy=True)
+    # Delete associated passes when a user is removed so foreign key
+    # constraints don't raise an ``IntegrityError``.
+    passes = db.relationship(
+        'Pass', backref='user', lazy=True, cascade='all, delete-orphan'
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

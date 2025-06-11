@@ -169,6 +169,15 @@ def create_user():
 
     form = UserForm()
     if form.validate_on_submit():
+        # Prevent ``IntegrityError`` by ensuring the username and email are
+        # unique before creating the user.
+        if User.query.filter_by(email=form.email.data).first():
+            flash("Az email cím már használatban van.", "danger")
+            return render_template("create_user.html", form=form)
+        if User.query.filter_by(username=form.username.data).first():
+            flash("A felhasználónév már foglalt.", "danger")
+            return render_template("create_user.html", form=form)
+
         user = User(username=form.username.data, email=form.email.data, role=form.role.data)
         user.set_password(form.password.data)
         db.session.add(user)
@@ -191,13 +200,18 @@ def delete_user(user_id):
     if current_user.role != 'admin':
         return redirect(url_for('user.dashboard'))
     user = User.query.get_or_404(user_id)
+
+    # Store details for the notification before the instance is removed
+    username = user.username
+    user_email = user.email
+
     db.session.delete(user)
     db.session.commit()
     send_event_email(
         'user_deleted',
         "Felhasználó törölve",
-        base_email_template("Felhasználó törölve", f"{user.username} törölve."),
-        user.email,
+        base_email_template("Felhasználó törölve", f"{username} törölve."),
+        user_email,
     )
     flash("Felhasználó törölve.", "success")
     return redirect(url_for('admin.users'))
