@@ -16,6 +16,14 @@ def registration_email(username: str, password: str) -> str:
     content = f"Kedves {username},<br><br>Felhasználónév: {username}<br>Jelszó: {password}<br>"
     return base_email_template("Fiók létrehozva", content)
 
+
+def forgot_password_email(username: str, password: str) -> str:
+    content = (
+        f"Kedves {username},<br><br>"
+        f"A kért jelszó: {password}<br>"
+    )
+    return base_email_template("Elfelejtett jelszó", content)
+
 def _pass_details(p) -> str:
     """Return a HTML snippet describing the given ``Pass``."""
     comment = f"<br>Megjegyzés: {p.comment}" if p.comment else ""

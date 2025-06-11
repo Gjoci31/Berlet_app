@@ -2,7 +2,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required
 from ..models import User
 from werkzeug.security import check_password_hash
-from ..forms import LoginForm
+from ..forms import LoginForm, ForgotPasswordForm
+from ..utils import send_email
+from ..email_templates import forgot_password_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -19,6 +21,24 @@ def login():
             return redirect(url_for('user.dashboard'))
         flash('Hibás felhasználónév vagy jelszó.')
     return render_template('login.html', form=form)
+
+
+@auth_bp.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    """Send the user's existing password to the provided email."""
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_email(
+                "Elfelejtett jelszó",
+                forgot_password_email(user.username, user.password_plain),
+                user.email,
+            )
+            flash('Jelszó elküldve az email címre.', 'success')
+        else:
+            flash('Nem található felhasználó ezzel az email címmel.', 'danger')
+    return render_template('forgot_password.html', form=form)
 
 @auth_bp.route('/logout')
 @login_required
