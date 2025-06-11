@@ -244,6 +244,10 @@ def delete_user(user_id):
         return redirect(url_for('user.dashboard'))
     user = User.query.get_or_404(user_id)
 
+    if user.username == 'admin':
+        flash('Az admin felhasználó nem törölhető.', 'danger')
+        return redirect(url_for('admin.users'))
+
     # Store details for the notification before the instance is removed
     username = user.username
     user_email = user.email
