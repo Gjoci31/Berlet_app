@@ -3,6 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from a .env file if present. This allows the
+# application to retrieve email credentials and other configuration values
+# without requiring them to be set in the system environment.
+load_dotenv()
 
 db = SQLAlchemy()
 login_manager = LoginManager()
