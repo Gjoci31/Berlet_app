@@ -8,6 +8,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(150), nullable=False, unique=True)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password_hash = db.Column(db.String(256), nullable=False)
+    # Store the plain password for reminder emails. This is insecure but
+    # required for the current application logic.
+    password_plain = db.Column(db.String(150))
     role = db.Column(db.String(10), nullable=False, default='user')  # 'admin' or 'user'
     # Delete associated passes when a user is removed so foreign key
     # constraints don't raise an ``IntegrityError``.
@@ -17,6 +20,7 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+        self.password_plain = password
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)

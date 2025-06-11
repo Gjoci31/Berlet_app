@@ -36,6 +36,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Bejelentkezés')
 
 
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Jelszó elküldése')
+
+
 class EmailSettingsForm(FlaskForm):
     email_from = StringField('Feladó email')
     email_password = PasswordField('Email jelszó')
