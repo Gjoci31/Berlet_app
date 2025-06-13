@@ -30,10 +30,12 @@ def create_app():
     from .routes.auth_routes import auth_bp
     from .routes.user_routes import user_bp
     from .routes.admin_routes import admin_bp
+    from .routes.event_routes import event_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(event_bp)
 
     # Ensure the database and required tables exist. Without this, a new
     # deployment would raise ``OperationalError`` when a route queries a
