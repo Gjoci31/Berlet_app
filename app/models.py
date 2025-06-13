@@ -95,6 +95,11 @@ class EventRegistration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User')
+    # ``User.event_registrations`` already adds a backref named ``user``
+    # so defining another relationship with the same name causes a
+    # ``sqlalchemy.exc.ArgumentError`` during mapper configuration.  The
+    # backref automatically provides the ``user`` attribute on
+    # ``EventRegistration`` instances, so the explicit relationship here is
+    # unnecessary and leads to conflicts when the models are imported.
 
 
