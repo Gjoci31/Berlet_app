@@ -31,6 +31,7 @@
         <div class="mb-3">
             {% if user.role == 'admin' %}
             <a href="{{ url_for('events.admin_events') }}" class="btn btn-warning btn-sm">Időpontok</a>
+            <a href="{{ url_for('events.events') }}" class="btn btn-warning btn-sm ms-2">Naptár</a>
             {% else %}
             <a href="{{ url_for('events.events') }}" class="btn btn-warning btn-sm">Időpontok</a>
             {% endif %}
