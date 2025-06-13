@@ -32,7 +32,7 @@
                             {{ reg.user.username }}
                             <form method="post" action="{{ url_for('events.remove_user', event_id=e.id, user_id=reg.user.id) }}" class="d-inline">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-link text-danger p-0">×</button>
+                                <button type="submit" class="btn btn-sm btn-link text-danger p-0">Töröl</button>
                             </form>
                         </span>
                         {% if not loop.last %}, {% endif %}
