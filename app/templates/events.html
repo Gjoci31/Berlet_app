@@ -39,9 +39,9 @@
                                 <div class="bg-primary text-white p-1 mb-1">
                                     {{ e.name }}
                                     {% if registrations.get(e.id) %}
-                                        <a href="{{ url_for('events.unregister', event_id=e.id) }}" class="text-white">Le</a>
+                                        <a href="{{ url_for('events.unregister', event_id=e.id) }}" class="text-white">Leiratkozom</a>
                                     {% elif e.spots_left > 0 %}
-                                        <a href="{{ url_for('events.signup', event_id=e.id) }}" class="text-white">Fel</a>
+                                        <a href="{{ url_for('events.signup', event_id=e.id) }}" class="text-white">Feliratkozom</a>
                                     {% endif %}
                                 </div>
                             {% endfor %}
