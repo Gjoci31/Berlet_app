@@ -28,18 +28,30 @@
                 <p class="card-text">Szabad hely: {{ e.spots_left }} / {{ e.capacity }}</p>
                 <p class="card-text"><strong>Jelentkezők:</strong>
                     {% for reg in e.registrations %}
-                        {{ reg.user.username }}{% if not loop.last %}, {% endif %}
+                        <span class="me-1">
+                            {{ reg.user.username }}
+                            <form method="post" action="{{ url_for('events.remove_user', event_id=e.id, user_id=reg.user.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-link text-danger p-0">×</button>
+                            </form>
+                        </span>
+                        {% if not loop.last %}, {% endif %}
                     {% else %}
                         nincs
                     {% endfor %}
                 </p>
-                <form method="post" action="{{ url_for('events.add_user', event_id=e.id) }}" class="d-flex">
+                <form method="post" action="{{ url_for('events.add_user', event_id=e.id) }}" class="d-flex mb-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <select name="user_id" class="form-select form-select-sm me-2">
                         {% for u in users %}
                         <option value="{{ u.id }}">{{ u.username }}</option>
                         {% endfor %}
                     </select>
                     <button class="btn btn-primary btn-sm" type="submit">Hozzáadás</button>
+                </form>
+                <form method="post" action="{{ url_for('events.delete_event', event_id=e.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-danger btn-sm" type="submit">Esemény törlése</button>
                 </form>
             </div>
         </div>

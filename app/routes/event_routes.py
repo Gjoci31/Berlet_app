@@ -125,3 +125,29 @@ def add_user(event_id):
         db.session.commit()
         flash('Felhasználó hozzáadva.', 'success')
     return redirect(url_for('events.admin_events'))
+
+
+@event_bp.route('/admin/events/remove_user/<int:event_id>/<int:user_id>', methods=['POST'])
+@login_required
+def remove_user(event_id, user_id):
+    """Remove a user's registration from an event."""
+    if current_user.role != 'admin':
+        return redirect(url_for('events.events'))
+    reg = EventRegistration.query.filter_by(event_id=event_id, user_id=user_id).first_or_404()
+    db.session.delete(reg)
+    db.session.commit()
+    flash('Felhasználó eltávolítva.', 'success')
+    return redirect(url_for('events.admin_events'))
+
+
+@event_bp.route('/admin/events/delete/<int:event_id>', methods=['POST'])
+@login_required
+def delete_event(event_id):
+    """Delete an entire event."""
+    if current_user.role != 'admin':
+        return redirect(url_for('events.events'))
+    event = Event.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    flash('Esemény törölve.', 'success')
+    return redirect(url_for('events.admin_events'))
