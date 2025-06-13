@@ -23,7 +23,7 @@
     </form>
     {% if p.usages %}
     <div class="mt-3">
-        <h5>Felhasználások</h5>
+        <h5>Felhasználva:</h5>
         <ul class="list-group list-group-flush">
         {% for usage in p.usages %}
             <li class="list-group-item bg-transparent text-white p-1">{{ usage.used_on.date() }}</li>
