@@ -21,6 +21,16 @@
         <div class="mb-3">{{ form.submit(class="btn btn-primary") }}</div>
         <a href="{{ url_for('admin.verify_pass', pass_id=pass_id) }}" class="btn btn-secondary">Visszalépés</a>
     </form>
+    {% if p.usages %}
+    <div class="mt-3">
+        <h5>Felhasználások</h5>
+        <ul class="list-group list-group-flush">
+        {% for usage in p.usages %}
+            <li class="list-group-item bg-transparent text-white p-1">{{ usage.used_on.date() }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 </div>
 </body>
 </html>

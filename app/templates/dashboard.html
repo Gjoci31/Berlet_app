@@ -40,19 +40,21 @@
                         <p class="card-text">Felhasználó: {{ p.user.username }}</p>
                         {% endif %}
                         {% if p.comment %}<p class="card-text"><small>{{ p.comment }}</small></p>{% endif %}
-                        {% if p.usages %}
-                            <ul class="list-unstyled mb-2">
-                            {% for usage in p.usages %}
-                                <li><small>{{ usage.used_on.date() }}</small></li>
-                            {% endfor %}
-                            </ul>
-                        {% endif %}
                         {% if user.role == 'admin' %}
                             <a href="{{ url_for('admin.verify_pass', pass_id=p.id) }}" class="btn btn-sm btn-warning">Szerkesztés</a>
                             <a href="{{ url_for('admin.delete_pass', pass_id=p.id) }}" class="btn btn-sm btn-danger">Törlés</a>
                         {% endif %}
                     </div>
                 </div>
+                {% if user.role != 'admin' and p.usages %}
+                <div class="mt-2">
+                    <ul class="list-unstyled mb-2">
+                    {% for usage in p.usages %}
+                        <li><small>{{ usage.used_on.date() }}</small></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
             </div>
         {% endfor %}
         </div>
