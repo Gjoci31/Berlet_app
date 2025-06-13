@@ -30,7 +30,7 @@
                     {% for reg in e.registrations %}
                         <form method="post" action="{{ url_for('events.remove_user', event_id=e.id, user_id=reg.user.id) }}" class="d-inline-flex align-items-center me-2">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <span class="me-1">| {{ reg.user.username }}</span>
+                            <span class="me-1">|| {{ reg.user.username }}</span>
                             <button type="submit" class="btn btn-sm btn-link text-danger p-0">Töröl</button>
                         </form>
                     {% else %}
