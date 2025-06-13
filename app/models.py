@@ -17,6 +17,9 @@ class User(UserMixin, db.Model):
     passes = db.relationship(
         'Pass', backref='user', lazy=True, cascade='all, delete-orphan'
     )
+    event_registrations = db.relationship(
+        'EventRegistration', backref='user', lazy=True, cascade='all, delete-orphan'
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -70,4 +73,28 @@ class EmailSettings(db.Model):
 
     pass_used_enabled = db.Column(db.Boolean, default=False)
     pass_used_text = db.Column(db.Text)
+
+
+class Event(db.Model):
+    """Calendar event which users can sign up for."""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    capacity = db.Column(db.Integer, nullable=False)
+    registrations = db.relationship(
+        'EventRegistration', backref='event', lazy=True, cascade='all, delete-orphan'
+    )
+
+    @property
+    def spots_left(self) -> int:
+        return self.capacity - len(self.registrations)
+
+
+class EventRegistration(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User')
+
 

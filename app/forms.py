@@ -3,6 +3,7 @@ from wtforms import (
     StringField,
     PasswordField,
     DateField,
+    DateTimeField,
     IntegerField,
     SubmitField,
     SelectField,
@@ -67,3 +68,11 @@ class RestoreForm(FlaskForm):
     """Form used for uploading a database backup to restore."""
     backup_file = FileField('Backup fájl', validators=[DataRequired()])
     submit = SubmitField('Visszaállítás')
+
+
+class EventForm(FlaskForm):
+    name = StringField('Esemény neve', validators=[DataRequired()])
+    start_time = DateTimeField('Kezdő időpont', validators=[DataRequired()])
+    end_time = DateTimeField('Vég időpont', validators=[DataRequired()])
+    capacity = IntegerField('Létszám', validators=[DataRequired(), NumberRange(min=1)])
+    submit = SubmitField('Mentés')
