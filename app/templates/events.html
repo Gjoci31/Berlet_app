@@ -19,22 +19,38 @@
     </nav>
     <div class="container mt-4">
         <h3>Események ({{ start }} - {{ end }})</h3>
-        {% for e in events %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ e.name }}</h5>
-                <p class="card-text">{{ e.start_time }} - {{ e.end_time }}</p>
-                <p class="card-text">Szabad hely: {{ e.spots_left }} / {{ e.capacity }}</p>
-                {% if registrations.get(e.id) %}
-                    <a href="{{ url_for('events.unregister', event_id=e.id) }}" class="btn btn-warning btn-sm">Lejelentkezés</a>
-                {% elif e.spots_left > 0 %}
-                    <a href="{{ url_for('events.signup', event_id=e.id) }}" class="btn btn-primary btn-sm">Jelentkezés</a>
-                {% else %}
-                    <span class="text-danger">Nincs szabad hely</span>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
+        <table class="table table-bordered calendar-table">
+            <thead>
+                <tr>
+                    <th>Óra</th>
+                    {% for day in days %}
+                        <th>{{ day.strftime('%m-%d') }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for hour in range(24) %}
+                <tr>
+                    <th>{{ '%02d:00' % hour }}</th>
+                    {% for day in days %}
+                        {% set evs = events_map.get((loop.index0, hour), []) %}
+                        <td>
+                            {% for e in evs %}
+                                <div class="bg-primary text-white p-1 mb-1">
+                                    {{ e.name }}
+                                    {% if registrations.get(e.id) %}
+                                        <a href="{{ url_for('events.unregister', event_id=e.id) }}" class="text-white">Le</a>
+                                    {% elif e.spots_left > 0 %}
+                                        <a href="{{ url_for('events.signup', event_id=e.id) }}" class="text-white">Fel</a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

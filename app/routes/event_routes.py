@@ -24,11 +24,25 @@ def events():
         .order_by(Event.start_time)
         .all()
     )
+    days = [start + timedelta(days=i) for i in range(14)]
+    events_map = {}
+    for e in events:
+        day_idx = (e.start_time.date() - start).days
+        hour = e.start_time.hour
+        events_map.setdefault((day_idx, hour), []).append(e)
     registrations = {
         reg.event_id: reg
         for reg in EventRegistration.query.filter_by(user_id=current_user.id)
     }
-    return render_template('events.html', events=events, start=start, end=end, registrations=registrations)
+    return render_template(
+        'events.html',
+        events=events,
+        start=start,
+        end=end,
+        registrations=registrations,
+        days=days,
+        events_map=events_map,
+    )
 
 
 @event_bp.route('/events/signup/<int:event_id>')
@@ -79,10 +93,12 @@ def create_event():
         return redirect(url_for('events.events'))
     form = EventForm()
     if form.validate_on_submit():
+        start_dt = datetime.combine(form.date.data, form.start_time.data)
+        end_dt = datetime.combine(form.date.data, form.end_time.data)
         event = Event(
             name=form.name.data,
-            start_time=form.start_time.data,
-            end_time=form.end_time.data,
+            start_time=start_dt,
+            end_time=end_dt,
             capacity=form.capacity.data,
         )
         db.session.add(event)

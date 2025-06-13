@@ -13,8 +13,9 @@
         <form method="POST">
             {{ form.hidden_tag() }}
             <div class="mb-3">{{ form.name.label }} {{ form.name(class="form-control") }}</div>
-            <div class="mb-3">{{ form.start_time.label }} {{ form.start_time(class="form-control") }}</div>
-            <div class="mb-3">{{ form.end_time.label }} {{ form.end_time(class="form-control") }}</div>
+            <div class="mb-3">{{ form.date.label }} {{ form.date(class="form-control", type="date") }}</div>
+            <div class="mb-3">{{ form.start_time.label }} {{ form.start_time(class="form-control", type="time") }}</div>
+            <div class="mb-3">{{ form.end_time.label }} {{ form.end_time(class="form-control", type="time") }}</div>
             <div class="mb-3">{{ form.capacity.label }} {{ form.capacity(class="form-control") }}</div>
             <div class="mb-3">{{ form.submit(class="btn btn-primary") }}</div>
         </form>

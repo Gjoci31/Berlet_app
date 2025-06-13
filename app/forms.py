@@ -3,7 +3,7 @@ from wtforms import (
     StringField,
     PasswordField,
     DateField,
-    DateTimeField,
+    TimeField,
     IntegerField,
     SubmitField,
     SelectField,
@@ -72,7 +72,8 @@ class RestoreForm(FlaskForm):
 
 class EventForm(FlaskForm):
     name = StringField('Esemény neve', validators=[DataRequired()])
-    start_time = DateTimeField('Kezdő időpont', validators=[DataRequired()])
-    end_time = DateTimeField('Vég időpont', validators=[DataRequired()])
+    date = DateField('Dátum', validators=[DataRequired()])
+    start_time = TimeField('Kezdő időpont', validators=[DataRequired()])
+    end_time = TimeField('Vég időpont', validators=[DataRequired()])
     capacity = IntegerField('Létszám', validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField('Mentés')
