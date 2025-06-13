@@ -48,6 +48,7 @@
                 </div>
                 {% if user.role != 'admin' and p.usages %}
                 <div class="mt-2">
+                    <h6>Felhasználva:</h6>
                     <ul class="list-unstyled mb-2">
                     {% for usage in p.usages %}
                         <li><small>{{ usage.used_on.date() }}</small></li>
