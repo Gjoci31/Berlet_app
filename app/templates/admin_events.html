@@ -28,12 +28,11 @@
                 <p class="card-text">Szabad hely: {{ e.spots_left }} / {{ e.capacity }}</p>
                 <p class="card-text"><strong>Jelentkezők:</strong><br>
                     {% for reg in e.registrations %}
-                        <span class="me-1 d-inline-flex align-items-center">| {{ reg.user.username }}
-                            <form method="post" action="{{ url_for('events.remove_user', event_id=e.id, user_id=reg.user.id) }}" class="d-inline ms-1">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-link text-danger p-0">Töröl</button>
-                            </form>
-                        </span>
+                        <form method="post" action="{{ url_for('events.remove_user', event_id=e.id, user_id=reg.user.id) }}" class="d-inline-flex align-items-center me-2">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <span class="me-1">| {{ reg.user.username }}</span>
+                            <button type="submit" class="btn btn-sm btn-link text-danger p-0">Töröl</button>
+                        </form>
                     {% else %}
                         nincs
                     {% endfor %}
