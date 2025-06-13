@@ -28,8 +28,17 @@ def events():
     events_map = {}
     for e in events:
         day_idx = (e.start_time.date() - start).days
-        hour = e.start_time.hour
-        events_map.setdefault((day_idx, hour), []).append(e)
+        start_hour = e.start_time.hour
+        end_hour = e.end_time.hour
+        for hour in range(start_hour, end_hour + 1):
+            start_minute = e.start_time.minute if hour == start_hour else 0
+            end_minute = e.end_time.minute if hour == end_hour else 60
+            events_map.setdefault((day_idx, hour), []).append({
+                'event': e,
+                'start_minute': start_minute,
+                'end_minute': end_minute,
+                'is_first': hour == start_hour,
+            })
     registrations = {
         reg.event_id: reg
         for reg in EventRegistration.query.filter_by(user_id=current_user.id)
