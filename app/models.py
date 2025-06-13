@@ -35,6 +35,15 @@ class Pass(db.Model):
     used = db.Column(db.Integer, default=0)
     comment = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    usages = db.relationship(
+        'PassUsage', backref='pass_ref', lazy=True, cascade='all, delete-orphan'
+    )
+
+
+class PassUsage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pass_id = db.Column(db.Integer, db.ForeignKey('pass.id'), nullable=False)
+    used_on = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 @login_manager.user_loader

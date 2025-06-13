@@ -12,7 +12,7 @@ from flask_login import login_required, current_user
 import os
 import shutil
 
-from ..models import Pass, User, db, EmailSettings
+from ..models import Pass, PassUsage, User, db, EmailSettings
 from ..forms import PassForm, UserForm, EmailSettingsForm, RestoreForm
 from ..utils import send_event_email
 from ..email_templates import (
@@ -136,6 +136,8 @@ def use_pass(pass_id):
     p = Pass.query.get_or_404(pass_id)
     if p.used < p.total_uses and p.end_date >= date.today():
         p.used += 1
+        usage = PassUsage(pass_id=pass_id)
+        db.session.add(usage)
         db.session.commit()
         send_event_email(
             'pass_used',
@@ -158,6 +160,13 @@ def undo_use(pass_id):
     p = Pass.query.get_or_404(pass_id)
     if p.used > 0:
         p.used -= 1
+        last_usage = (
+            PassUsage.query.filter_by(pass_id=pass_id)
+            .order_by(PassUsage.used_on.desc())
+            .first()
+        )
+        if last_usage:
+            db.session.delete(last_usage)
         db.session.commit()
         flash("Felhasználás visszavonva.", "success")
     return redirect(url_for('admin.verify_pass', pass_id=pass_id))
