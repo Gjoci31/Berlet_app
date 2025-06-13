@@ -35,3 +35,8 @@
     border-radius: 2px;
     overflow: hidden;
 }
+
+.calendar-event.with-text {
+    overflow: visible;
+    z-index: 1;
+}
