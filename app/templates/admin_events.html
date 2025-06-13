@@ -24,7 +24,7 @@
         <div class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">{{ e.name }}</h5>
-                <p class="card-text">{{ e.start_time }} - {{ e.end_time }}</p>
+                <p class="card-text">{{ e.formatted_time }}</p>
                 <p class="card-text">Szabad hely: {{ e.spots_left }} / {{ e.capacity }}</p>
                 <p class="card-text"><strong>Jelentkezők:</strong><br>
                     {% for reg in e.registrations %}

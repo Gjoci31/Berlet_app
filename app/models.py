@@ -90,6 +90,26 @@ class Event(db.Model):
     def spots_left(self) -> int:
         return self.capacity - len(self.registrations)
 
+    @property
+    def formatted_time(self) -> str:
+        """Return the event time formatted with the Hungarian day name."""
+        day_names = [
+            'Hétfő',
+            'Kedd',
+            'Szerda',
+            'Csütörtök',
+            'Péntek',
+            'Szombat',
+            'Vasárnap',
+        ]
+        start = self.start_time
+        end = self.end_time
+        return (
+            f"{start.strftime('%Y-%m-%d')} "
+            f"{day_names[start.weekday()]} "
+            f"{start.strftime('%H:%M')} - {end.strftime('%H:%M')}"
+        )
+
 
 class EventRegistration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
