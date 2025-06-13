@@ -23,8 +23,9 @@
             <thead>
                 <tr>
                     <th>Óra</th>
+                    {% set day_names = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap'] %}
                     {% for day in days %}
-                        <th>{{ day.strftime('%m-%d') }}</th>
+                        <th>{{ day.strftime('%m-%d') }} {{ day_names[day.weekday()] }}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -35,13 +36,17 @@
                     {% for day in days %}
                         {% set evs = events_map.get((loop.index0, hour), []) %}
                         <td>
-                            {% for e in evs %}
-                                <div class="bg-primary text-white p-1 mb-1">
-                                    {{ e.name }}
-                                    {% if registrations.get(e.id) %}
-                                        <a href="{{ url_for('events.unregister', event_id=e.id) }}" class="text-white">Leiratkozom</a>
-                                    {% elif e.spots_left > 0 %}
-                                        <a href="{{ url_for('events.signup', event_id=e.id) }}" class="text-white">Feliratkozom</a>
+                            {% for seg in evs %}
+                                {% set e = seg.event %}
+                                <div class="calendar-event{% if seg.is_first %} with-text{% endif %}"
+                                     style="top: {{ seg.start_minute }}px; height: {{ seg.end_minute - seg.start_minute }}px;">
+                                    {% if seg.is_first %}
+                                        {{ e.name }}
+                                        {% if registrations.get(e.id) %}
+                                            <a href="{{ url_for('events.unregister', event_id=e.id) }}" class="text-white">Leiratkozom</a>
+                                        {% elif e.spots_left > 0 %}
+                                            <a href="{{ url_for('events.signup', event_id=e.id) }}" class="text-white">Feliratkozom</a>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             {% endfor %}
