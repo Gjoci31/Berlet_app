@@ -26,7 +26,7 @@
                 <h5 class="card-title">{{ e.name }}</h5>
                 <p class="card-text">{{ e.start_time }} - {{ e.end_time }}</p>
                 <p class="card-text">Szabad hely: {{ e.spots_left }} / {{ e.capacity }}</p>
-                <p class="card-text"><strong>Jelentkezők:</strong>
+                <p class="card-text"><strong>Jelentkezők:</strong><br>
                     {% for reg in e.registrations %}
                         <span class="me-1 d-inline-flex align-items-center">| {{ reg.user.username }}
                             <form method="post" action="{{ url_for('events.remove_user', event_id=e.id, user_id=reg.user.id) }}" class="d-inline ms-1">
