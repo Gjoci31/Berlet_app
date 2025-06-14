@@ -67,6 +67,12 @@ class EmailSettingsForm(FlaskForm):
     event_signup_admin_enabled = BooleanField('Esemény jelentkezéskor (admin)')
     event_signup_admin_text = TextAreaField('Admin jelentkeztetés üzenete')
 
+    event_unregister_user_enabled = BooleanField('Leiratkozáskor (saját)')
+    event_unregister_user_text = TextAreaField('Saját leiratkozás üzenete')
+
+    event_unregister_admin_enabled = BooleanField('Leiratkozáskor (admin)')
+    event_unregister_admin_text = TextAreaField('Admin leiratkoztatás üzenete')
+
     submit = SubmitField('Mentés')
 
 

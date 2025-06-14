@@ -77,6 +77,22 @@
             {{ form.event_signup_admin_text.label(class="form-label") }}
             {{ form.event_signup_admin_text(class="form-control") }}
         </div>
+        <div class="form-check">
+            {{ form.event_unregister_user_enabled(class="form-check-input") }}
+            {{ form.event_unregister_user_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.event_unregister_user_text.label(class="form-label") }}
+            {{ form.event_unregister_user_text(class="form-control") }}
+        </div>
+        <div class="form-check">
+            {{ form.event_unregister_admin_enabled(class="form-check-input") }}
+            {{ form.event_unregister_admin_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.event_unregister_admin_text.label(class="form-label") }}
+            {{ form.event_unregister_admin_text(class="form-control") }}
+        </div>
         {{ form.submit(class="btn btn-primary") }}
         <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Vissza</a>
     </form>
