@@ -40,7 +40,28 @@ def create_app():
     # Ensure the database and required tables exist. Without this, a new
     # deployment would raise ``OperationalError`` when a route queries a
     # table that hasn't been created yet, resulting in a 500 error.
+    #
+    # ``db.create_all()`` only creates tables that do not already exist and
+    # does not add new columns to existing tables. The application recently
+    # introduced a ``color`` column on the ``Event`` model which older
+    # databases may lack. Attempting to query such a database causes a
+    # ``sqlite3.OperationalError: no such column: event.color`` and results in
+    # a 500 error when the calendar page is opened.  To provide a smooth
+    # upgrade path without requiring a manual migration step, check for the
+    # column and add it if missing.
     with app.app_context():
         db.create_all()
+
+        # ``PRAGMA table_info`` returns the columns of the given table.  When
+        # the ``color`` column is absent, execute an ``ALTER TABLE`` statement
+        # to add it with the default value ``'blue'`` so existing rows remain
+        # valid and future queries succeed.
+        insp = db.engine.execute("PRAGMA table_info(event)")
+        columns = [row[1] for row in insp]
+        if 'color' not in columns:
+            db.engine.execute(
+                "ALTER TABLE event ADD COLUMN color VARCHAR(20) DEFAULT 'blue'"
+            )
+        insp.close()
 
     return app
