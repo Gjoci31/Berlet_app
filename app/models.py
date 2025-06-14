@@ -126,6 +126,16 @@ class Event(db.Model):
             f"{start.strftime('%H:%M')} - {end.strftime('%H:%M')}"
         )
 
+    @property
+    def status(self) -> str:
+        """Return whether the event is past, ongoing or upcoming."""
+        now = datetime.now()
+        if self.end_time < now:
+            return "past"
+        if self.start_time <= now <= self.end_time:
+            return "ongoing"
+        return "upcoming"
+
 
 class EventRegistration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
