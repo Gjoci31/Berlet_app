@@ -43,6 +43,12 @@ def events():
         reg.event_id: reg
         for reg in EventRegistration.query.filter_by(user_id=current_user.id)
     }
+
+    participants = {
+        e.id: "<br>".join(reg.user.username for reg in e.registrations) or "nincs"
+        for e in events
+    }
+
     return render_template(
         'events.html',
         events=events,
@@ -51,6 +57,7 @@ def events():
         registrations=registrations,
         days=days,
         events_map=events_map,
+        participants=participants,
     )
 
 
