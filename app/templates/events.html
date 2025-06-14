@@ -25,7 +25,13 @@
                     <th>Óra</th>
                     {% set day_names = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap'] %}
                     {% for day in days %}
-                        <th>{{ day.strftime('%m-%d') }} {{ day_names[day.weekday()] }}</th>
+                        {% set cls = 'weekday' %}
+                        {% if day.weekday() == 5 %}
+                            {% set cls = 'saturday' %}
+                        {% elif day.weekday() == 6 %}
+                            {% set cls = 'sunday' %}
+                        {% endif %}
+                        <th class="{{ cls }}">{{ day.strftime('%m-%d') }} {{ day_names[day.weekday()] }}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -35,7 +41,13 @@
                     <th>{{ '%02d:00' % hour }}</th>
                     {% for day in days %}
                         {% set evs = events_map.get((loop.index0, hour), []) %}
-                        <td>
+                        {% set cls = 'weekday' %}
+                        {% if day.weekday() == 5 %}
+                            {% set cls = 'saturday' %}
+                        {% elif day.weekday() == 6 %}
+                            {% set cls = 'sunday' %}
+                        {% endif %}
+                        <td class="{{ cls }}">
                             {% for seg in evs %}
                                 {% set e = seg.event %}
                                 <div class="calendar-event{% if seg.is_first %} with-text{% endif %}"
