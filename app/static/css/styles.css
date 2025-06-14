@@ -40,3 +40,19 @@
     overflow: visible;
     z-index: 1;
 }
+
+/* Background colors for calendar columns */
+.calendar-table th.weekday,
+.calendar-table td.weekday {
+    background-color: #e9f4ff; /* light blue */
+}
+
+.calendar-table th.saturday,
+.calendar-table td.saturday {
+    background-color: #fff9e6; /* light yellow */
+}
+
+.calendar-table th.sunday,
+.calendar-table td.sunday {
+    background-color: #ffe6e6; /* light red */
+}
