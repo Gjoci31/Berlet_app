@@ -74,6 +74,12 @@ class EmailSettings(db.Model):
     pass_used_enabled = db.Column(db.Boolean, default=False)
     pass_used_text = db.Column(db.Text)
 
+    event_signup_user_enabled = db.Column(db.Boolean, default=False)
+    event_signup_user_text = db.Column(db.Text)
+
+    event_signup_admin_enabled = db.Column(db.Boolean, default=False)
+    event_signup_admin_text = db.Column(db.Text)
+
 
 class Event(db.Model):
     """Calendar event which users can sign up for."""

@@ -4,6 +4,11 @@ from datetime import datetime, timedelta
 
 from ..models import Event, EventRegistration, User, db
 from ..forms import EventForm
+from ..utils import send_event_email
+from ..email_templates import (
+    event_signup_user_email,
+    event_signup_admin_email,
+)
 
 
 event_bp = Blueprint('events', __name__)
@@ -73,6 +78,12 @@ def signup(event_id):
         reg = EventRegistration(event_id=event_id, user_id=current_user.id)
         db.session.add(reg)
         db.session.commit()
+        send_event_email(
+            'event_signup_user',
+            'Esemény jelentkezés',
+            event_signup_user_email(current_user.username, event),
+            current_user.email,
+        )
         flash('Jelentkezés sikeres.', 'success')
     return redirect(url_for('events.events'))
 
@@ -168,6 +179,14 @@ def add_user(event_id):
         reg = EventRegistration(event_id=event_id, user_id=user_id)
         db.session.add(reg)
         db.session.commit()
+        user = User.query.get(user_id)
+        if user:
+            send_event_email(
+                'event_signup_admin',
+                'Esemény jelentkezés',
+                event_signup_admin_email(user.username, event),
+                user.email,
+            )
         flash('Felhasználó hozzáadva.', 'success')
 
     next_page = request.args.get('next')

@@ -61,6 +61,12 @@ class EmailSettingsForm(FlaskForm):
     pass_used_enabled = BooleanField('Alkalom változásakor')
     pass_used_text = TextAreaField('Alkalom változás üzenete')
 
+    event_signup_user_enabled = BooleanField('Esemény jelentkezéskor (saját)')
+    event_signup_user_text = TextAreaField('Saját jelentkezés üzenete')
+
+    event_signup_admin_enabled = BooleanField('Esemény jelentkezéskor (admin)')
+    event_signup_admin_text = TextAreaField('Admin jelentkeztetés üzenete')
+
     submit = SubmitField('Mentés')
 
 

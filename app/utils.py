@@ -76,6 +76,14 @@ def send_event_email(event, subject, default_html, to_email):
             'pass_created': (settings.pass_created_enabled, settings.pass_created_text),
             'pass_deleted': (settings.pass_deleted_enabled, settings.pass_deleted_text),
             'pass_used': (settings.pass_used_enabled, settings.pass_used_text),
+            'event_signup_user': (
+                settings.event_signup_user_enabled,
+                settings.event_signup_user_text,
+            ),
+            'event_signup_admin': (
+                settings.event_signup_admin_enabled,
+                settings.event_signup_admin_text,
+            ),
         }
         enabled, custom_text = mapping.get(event, (False, None))
         if not enabled:
