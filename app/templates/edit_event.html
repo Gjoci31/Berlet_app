@@ -10,6 +10,7 @@
 <body class="bg-light">
     <div class="container mt-5">
         <h3>Esemény szerkesztése</h3>
+        <a href="{{ url_for('events.admin_events') }}" class="btn btn-secondary btn-sm mb-3">Vissza az eseményekhez</a>
         <form method="POST">
             {{ form.hidden_tag() }}
             <div class="mb-3">
