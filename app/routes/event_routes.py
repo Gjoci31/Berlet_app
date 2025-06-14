@@ -8,6 +8,8 @@ from ..utils import send_event_email
 from ..email_templates import (
     event_signup_user_email,
     event_signup_admin_email,
+    event_unregister_user_email,
+    event_unregister_admin_email,
 )
 
 
@@ -92,8 +94,15 @@ def signup(event_id):
 @login_required
 def unregister(event_id):
     reg = EventRegistration.query.filter_by(event_id=event_id, user_id=current_user.id).first_or_404()
+    event = reg.event
     db.session.delete(reg)
     db.session.commit()
+    send_event_email(
+        'event_unregister_user',
+        'Esemény leiratkozás',
+        event_unregister_user_email(current_user.username, event),
+        current_user.email,
+    )
     flash('Jelentkezés törölve.', 'success')
     return redirect(url_for('events.events'))
 
@@ -202,8 +211,17 @@ def remove_user(event_id, user_id):
     if current_user.role != 'admin':
         return redirect(url_for('events.events'))
     reg = EventRegistration.query.filter_by(event_id=event_id, user_id=user_id).first_or_404()
+    event = reg.event
+    user = reg.user
     db.session.delete(reg)
     db.session.commit()
+    if user:
+        send_event_email(
+            'event_unregister_admin',
+            'Esemény leiratkozás',
+            event_unregister_admin_email(user.username, event),
+            user.email,
+        )
     flash('Felhasználó eltávolítva.', 'success')
     next_page = request.args.get('next')
     if next_page == 'edit':

@@ -84,6 +84,14 @@ def send_event_email(event, subject, default_html, to_email):
                 settings.event_signup_admin_enabled,
                 settings.event_signup_admin_text,
             ),
+            'event_unregister_user': (
+                settings.event_unregister_user_enabled,
+                settings.event_unregister_user_text,
+            ),
+            'event_unregister_admin': (
+                settings.event_unregister_admin_enabled,
+                settings.event_unregister_admin_text,
+            ),
         }
         enabled, custom_text = mapping.get(event, (False, None))
         if not enabled:

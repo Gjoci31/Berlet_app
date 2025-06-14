@@ -79,3 +79,23 @@ def event_signup_admin_email(username: str, e) -> str:
         f"{_event_details(e)}"
     )
     return base_email_template("Esemény jelentkezés", content)
+
+
+def event_unregister_user_email(username: str, e) -> str:
+    """Return the email HTML when a user unregisters from an event."""
+    content = (
+        f"Kedves {username},<br><br>"
+        f"Sikeresen leiratkoztál a következő eseményről:<br>"
+        f"{_event_details(e)}"
+    )
+    return base_email_template("Esemény leiratkozás", content)
+
+
+def event_unregister_admin_email(username: str, e) -> str:
+    """Return the email HTML when an admin removes a user from an event."""
+    content = (
+        f"Kedves {username},<br><br>"
+        f"Az admin törölte a jelentkezésed a következő eseményről:<br>"
+        f"{_event_details(e)}"
+    )
+    return base_email_template("Esemény leiratkozás", content)
