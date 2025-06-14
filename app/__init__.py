@@ -73,4 +73,33 @@ def create_app():
                 conn.commit()
             insp.close()
 
+            insp = conn.execute(text("PRAGMA table_info(email_settings)"))
+            columns = [row[1] for row in insp]
+            if 'event_signup_user_enabled' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN event_signup_user_enabled BOOLEAN DEFAULT 0"
+                    )
+                )
+            if 'event_signup_user_text' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN event_signup_user_text TEXT"
+                    )
+                )
+            if 'event_signup_admin_enabled' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN event_signup_admin_enabled BOOLEAN DEFAULT 0"
+                    )
+                )
+            if 'event_signup_admin_text' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN event_signup_admin_text TEXT"
+                    )
+                )
+            conn.commit()
+            insp.close()
+
     return app

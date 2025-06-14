@@ -53,3 +53,29 @@ def pass_used_email(p) -> str:
         f"{_pass_details(p)}"
     )
     return base_email_template("Bérlet használat", content)
+
+
+def _event_details(e) -> str:
+    """Return a HTML snippet describing an ``Event``."""
+    return (
+        f"Esemény: {e.name}<br>"
+        f"Időpont: {e.formatted_time}"
+    )
+
+
+def event_signup_user_email(username: str, e) -> str:
+    content = (
+        f"Kedves {username},<br><br>"
+        f"Sikeresen jelentkeztél a következő eseményre:<br>"
+        f"{_event_details(e)}"
+    )
+    return base_email_template("Esemény jelentkezés", content)
+
+
+def event_signup_admin_email(username: str, e) -> str:
+    content = (
+        f"Kedves {username},<br><br>"
+        f"Az admin regisztrált a következő eseményre:<br>"
+        f"{_event_details(e)}"
+    )
+    return base_email_template("Esemény jelentkezés", content)
