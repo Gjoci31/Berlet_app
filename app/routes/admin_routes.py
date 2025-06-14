@@ -168,6 +168,12 @@ def undo_use(pass_id):
         if last_usage:
             db.session.delete(last_usage)
         db.session.commit()
+        send_event_email(
+            'pass_used',
+            "Bérlet használat",
+            pass_used_email(p),
+            p.user.email,
+        )
         flash("Felhasználás visszavonva.", "success")
     return redirect(url_for('admin.verify_pass', pass_id=pass_id))
 
