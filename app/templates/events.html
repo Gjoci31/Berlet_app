@@ -39,7 +39,7 @@
                             {% for seg in evs %}
                                 {% set e = seg.event %}
                                 <div class="calendar-event{% if seg.is_first %} with-text{% endif %}"
-                                     style="top: {{ seg.start_minute }}px; height: {{ seg.end_minute - seg.start_minute }}px;">
+                                     style="top: {{ seg.start_minute }}px; height: {{ seg.end_minute - seg.start_minute }}px; background-color: {{ e.color_hex }};">
                                     {% if seg.is_first %}
                                         {{ e.name }}
                                         {% if registrations.get(e.id) %}

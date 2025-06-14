@@ -82,9 +82,25 @@ class Event(db.Model):
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
     capacity = db.Column(db.Integer, nullable=False)
+    color = db.Column(db.String(20), nullable=False, default='blue')
     registrations = db.relationship(
         'EventRegistration', backref='event', lazy=True, cascade='all, delete-orphan'
     )
+
+    COLOR_MAP = {
+        'darkgreen': '#006400',
+        'red': '#dc3545',
+        'blue': '#0d6efd',
+        'purple': '#6f42c1',
+        'orange': '#fd7e14',
+        'burgundy': '#800020',
+        'darkblue': '#00008b',
+    }
+
+    @property
+    def color_hex(self) -> str:
+        """Return the hex color code for the event's color."""
+        return self.COLOR_MAP.get(self.color, '#0d6efd')
 
     @property
     def spots_left(self) -> int:

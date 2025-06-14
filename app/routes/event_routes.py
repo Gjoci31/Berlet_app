@@ -109,6 +109,7 @@ def create_event():
             start_time=start_dt,
             end_time=end_dt,
             capacity=form.capacity.data,
+            color=form.color.data,
         )
         db.session.add(event)
         db.session.commit()
