@@ -56,12 +56,21 @@ def create_app():
         # the ``color`` column is absent, execute an ``ALTER TABLE`` statement
         # to add it with the default value ``'blue'`` so existing rows remain
         # valid and future queries succeed.
-        insp = db.engine.execute("PRAGMA table_info(event)")
-        columns = [row[1] for row in insp]
-        if 'color' not in columns:
-            db.engine.execute(
-                "ALTER TABLE event ADD COLUMN color VARCHAR(20) DEFAULT 'blue'"
-            )
-        insp.close()
+        # SQLAlchemy 2 removed the ``Engine.execute`` helper.  Use an explicit
+        # connection so this code works on newer versions while remaining
+        # compatible with SQLAlchemy 1.x.
+        from sqlalchemy import text
+
+        with db.engine.connect() as conn:
+            insp = conn.execute(text("PRAGMA table_info(event)"))
+            columns = [row[1] for row in insp]
+            if 'color' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE event ADD COLUMN color VARCHAR(20) DEFAULT 'blue'"
+                    )
+                )
+                conn.commit()
+            insp.close()
 
     return app
