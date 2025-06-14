@@ -141,7 +141,7 @@ def add_user(event_id):
         db.session.add(reg)
         db.session.commit()
         flash('Felhasználó hozzáadva.', 'success')
-    return redirect(url_for('events.admin_events'))
+    return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
 
 @event_bp.route('/admin/events/remove_user/<int:event_id>/<int:user_id>', methods=['POST'])
@@ -154,7 +154,7 @@ def remove_user(event_id, user_id):
     db.session.delete(reg)
     db.session.commit()
     flash('Felhasználó eltávolítva.', 'success')
-    return redirect(url_for('events.admin_events'))
+    return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
 
 @event_bp.route('/admin/events/delete/<int:event_id>', methods=['POST'])
@@ -167,4 +167,4 @@ def delete_event(event_id):
     db.session.delete(event)
     db.session.commit()
     flash('Esemény törölve.', 'success')
-    return redirect(url_for('events.admin_events'))
+    return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
