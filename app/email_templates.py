@@ -55,6 +55,18 @@ def pass_used_email(p) -> str:
     return base_email_template("Bérlet használat", content)
 
 
+def pass_usage_reverted_email(p) -> str:
+    """Return the email HTML when a pass usage is undone."""
+    remaining = p.total_uses - p.used
+    content = (
+        f"Kedves {p.user.username},<br>"
+        f"Visszakaptál egy alkalmat a(z) {p.type} bérletedbe.<br>"
+        f"Hátralévő alkalmak: {remaining}.<br><br>"
+        f"{_pass_details(p)}"
+    )
+    return base_email_template("Bérlethasználat visszavonva", content)
+
+
 def _event_details(e) -> str:
     """Return a HTML snippet describing an ``Event``."""
     return (

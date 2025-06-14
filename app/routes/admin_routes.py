@@ -19,6 +19,7 @@ from ..email_templates import (
     pass_created_email,
     pass_deleted_email,
     pass_used_email,
+    pass_usage_reverted_email,
     registration_email,
     base_email_template,
 )
@@ -170,8 +171,8 @@ def undo_use(pass_id):
         db.session.commit()
         send_event_email(
             'pass_used',
-            "Bérlet használat",
-            pass_used_email(p),
+            "Bérlet használat visszavonva",
+            pass_usage_reverted_email(p),
             p.user.email,
         )
         flash("Felhasználás visszavonva.", "success")
