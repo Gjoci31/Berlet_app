@@ -76,4 +76,18 @@ class EventForm(FlaskForm):
     start_time = TimeField('Kezdő időpont', validators=[DataRequired()])
     end_time = TimeField('Vég időpont', validators=[DataRequired()])
     capacity = IntegerField('Létszám', validators=[DataRequired(), NumberRange(min=1)])
+    color = SelectField(
+        'Szín',
+        choices=[
+            ('darkgreen', 'Sötétzöld'),
+            ('red', 'Piros'),
+            ('blue', 'Kék'),
+            ('purple', 'Lila'),
+            ('orange', 'Narancs'),
+            ('burgundy', 'Bordó'),
+            ('darkblue', 'Sötétkék'),
+        ],
+        default='blue',
+        validators=[DataRequired()],
+    )
     submit = SubmitField('Mentés')
