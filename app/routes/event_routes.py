@@ -125,6 +125,34 @@ def create_event():
     return render_template('create_event.html', form=form)
 
 
+@event_bp.route('/admin/events/<int:event_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_event(event_id):
+    """Edit an existing event."""
+    if current_user.role != 'admin':
+        return redirect(url_for('events.events'))
+
+    event = Event.query.get_or_404(event_id)
+    form = EventForm(obj=event)
+
+    if request.method == 'GET':
+        form.date.data = event.start_time.date()
+        form.start_time.data = event.start_time.time()
+        form.end_time.data = event.end_time.time()
+
+    if form.validate_on_submit():
+        event.start_time = datetime.combine(form.date.data, form.start_time.data)
+        event.end_time = datetime.combine(form.date.data, form.end_time.data)
+        event.capacity = form.capacity.data
+        event.color = form.color.data
+        db.session.commit()
+        flash('Esemény frissítve.', 'success')
+        return redirect(url_for('events.admin_events'))
+
+    users = User.query.all()
+    return render_template('edit_event.html', form=form, event=event, users=users)
+
+
 @event_bp.route('/admin/events/add_user/<int:event_id>', methods=['POST'])
 @login_required
 def add_user(event_id):
@@ -141,6 +169,10 @@ def add_user(event_id):
         db.session.add(reg)
         db.session.commit()
         flash('Felhasználó hozzáadva.', 'success')
+
+    next_page = request.args.get('next')
+    if next_page == 'edit':
+        return redirect(url_for('events.edit_event', event_id=event_id))
     return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
 
@@ -154,6 +186,9 @@ def remove_user(event_id, user_id):
     db.session.delete(reg)
     db.session.commit()
     flash('Felhasználó eltávolítva.', 'success')
+    next_page = request.args.get('next')
+    if next_page == 'edit':
+        return redirect(url_for('events.edit_event', event_id=event_id))
     return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
 
