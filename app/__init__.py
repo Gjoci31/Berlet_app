@@ -16,8 +16,6 @@ except ModuleNotFoundError:  # pragma: no cover - optional dependency
         "APScheduler is not installed. Scheduled tasks will be disabled."
     )
 
-from .models import EmailSettings
-from .utils import send_weekly_reminders
 
 # Load environment variables from a .env file if present. This allows the
 # application to retrieve email credentials and other configuration values
@@ -33,6 +31,7 @@ def update_weekly_reminder_schedule(app):
     """Configure the weekly reminder job based on current settings."""
     if scheduler is None:
         return
+    from .models import EmailSettings  # Local import to avoid circular dependency
     with app.app_context():
         settings = EmailSettings.query.first()
         if settings and settings.weekly_reminder_time:
@@ -43,6 +42,7 @@ def update_weekly_reminder_schedule(app):
             minute = 0
         day = settings.weekly_reminder_day if settings else 0
         trigger = CronTrigger(day_of_week=day, hour=hour, minute=minute)
+    from .utils import send_weekly_reminders  # Local import to avoid circular dependency
     scheduler.add_job(
         send_weekly_reminders,
         trigger,
