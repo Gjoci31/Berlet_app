@@ -5,6 +5,7 @@ from flask_wtf import CSRFProtect
 import os
 from dotenv import load_dotenv
 import logging
+from zoneinfo import ZoneInfo
 
 try:
     from apscheduler.schedulers.background import BackgroundScheduler
@@ -25,7 +26,11 @@ load_dotenv()
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
-scheduler = BackgroundScheduler() if BackgroundScheduler else None
+scheduler = (
+    BackgroundScheduler(timezone=ZoneInfo("Europe/Budapest"))
+    if BackgroundScheduler
+    else None
+)
 
 def update_weekly_reminder_schedule(app):
     """Configure the weekly reminder job based on current settings."""
