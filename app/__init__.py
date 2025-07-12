@@ -17,6 +17,28 @@ load_dotenv()
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
+scheduler = BackgroundScheduler()
+
+def update_weekly_reminder_schedule(app):
+    """Configure the weekly reminder job based on current settings."""
+    with app.app_context():
+        settings = EmailSettings.query.first()
+        if settings and settings.weekly_reminder_time:
+            hour = settings.weekly_reminder_time.hour
+            minute = settings.weekly_reminder_time.minute
+        else:
+            hour = 8
+            minute = 0
+        day = settings.weekly_reminder_day if settings else 0
+        trigger = CronTrigger(day_of_week=day, hour=hour, minute=minute)
+    scheduler.add_job(
+        send_weekly_reminders,
+        trigger,
+        args=[app],
+        id="weekly_reminder",
+        replace_existing=True,
+    )
+
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -167,18 +189,7 @@ def create_app():
             insp.close()
 
     # Set up weekly reminder scheduler
-    scheduler = BackgroundScheduler()
-    with app.app_context():
-        settings = EmailSettings.query.first()
-        if settings and settings.weekly_reminder_time:
-            hour = settings.weekly_reminder_time.hour
-            minute = settings.weekly_reminder_time.minute
-        else:
-            hour = 8
-            minute = 0
-        day = settings.weekly_reminder_day if settings else 0
-        trigger = CronTrigger(day_of_week=day, hour=hour, minute=minute)
-        scheduler.add_job(send_weekly_reminders, trigger, args=[app], id="weekly_reminder", replace_existing=True)
+    update_weekly_reminder_schedule(app)
     scheduler.start()
 
     return app
