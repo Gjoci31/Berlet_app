@@ -12,3 +12,12 @@ def dashboard():
     else:
         passes = Pass.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html', passes=passes, user=current_user)
+
+
+@user_bp.route('/toggle_reminder', methods=['POST'])
+@login_required
+def toggle_reminder():
+    current_user.weekly_reminder_opt_in = not current_user.weekly_reminder_opt_in
+    db.session.commit()
+    next_url = request.referrer or url_for('user.dashboard')
+    return redirect(next_url)

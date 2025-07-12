@@ -93,6 +93,23 @@
             {{ form.event_unregister_admin_text.label(class="form-label") }}
             {{ form.event_unregister_admin_text(class="form-control") }}
         </div>
+        <hr>
+        <div class="form-check">
+            {{ form.weekly_reminder_enabled(class="form-check-input") }}
+            {{ form.weekly_reminder_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.weekly_reminder_text.label(class="form-label") }}
+            {{ form.weekly_reminder_text(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.weekly_reminder_day.label(class="form-label") }}
+            {{ form.weekly_reminder_day(class="form-select") }}
+        </div>
+        <div class="mb-3">
+            {{ form.weekly_reminder_time.label(class="form-label") }}
+            {{ form.weekly_reminder_time(class="form-control") }}
+        </div>
         {{ form.submit(class="btn btn-primary") }}
         <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Vissza</a>
     </form>

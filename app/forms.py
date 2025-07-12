@@ -73,6 +73,23 @@ class EmailSettingsForm(FlaskForm):
     event_unregister_admin_enabled = BooleanField('Leiratkozáskor (admin)')
     event_unregister_admin_text = TextAreaField('Admin leiratkoztatás üzenete')
 
+    weekly_reminder_enabled = BooleanField('Heti emlékeztető bekapcsolása')
+    weekly_reminder_text = TextAreaField('Emlékeztető szöveg')
+    weekly_reminder_day = SelectField(
+        'Emlékeztető napja',
+        choices=[
+            (0, 'Hétfő'),
+            (1, 'Kedd'),
+            (2, 'Szerda'),
+            (3, 'Csütörtök'),
+            (4, 'Péntek'),
+            (5, 'Szombat'),
+            (6, 'Vasárnap'),
+        ],
+        coerce=int,
+    )
+    weekly_reminder_time = TimeField('Emlékeztető időpontja')
+
     submit = SubmitField('Mentés')
 
 

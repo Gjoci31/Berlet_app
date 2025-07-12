@@ -21,6 +21,8 @@ class User(UserMixin, db.Model):
         'EventRegistration', backref='user', lazy=True, cascade='all, delete-orphan'
     )
 
+    weekly_reminder_opt_in = db.Column(db.Boolean, default=False)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
         self.password_plain = password
@@ -85,6 +87,11 @@ class EmailSettings(db.Model):
 
     event_unregister_admin_enabled = db.Column(db.Boolean, default=False)
     event_unregister_admin_text = db.Column(db.Text)
+
+    weekly_reminder_enabled = db.Column(db.Boolean, default=False)
+    weekly_reminder_text = db.Column(db.Text)
+    weekly_reminder_day = db.Column(db.Integer, default=0)
+    weekly_reminder_time = db.Column(db.Time)
 
 
 class Event(db.Model):
