@@ -4,6 +4,10 @@ from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 import os
 from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from .models import EmailSettings
+from .utils import send_weekly_reminders
 
 # Load environment variables from a .env file if present. This allows the
 # application to retrieve email credentials and other configuration values
@@ -73,6 +77,18 @@ def create_app():
                 conn.commit()
             insp.close()
 
+            # Ensure weekly_reminder_opt_in exists on the user table
+            insp = conn.execute(text("PRAGMA table_info(user)"))
+            columns = [row[1] for row in insp]
+            if 'weekly_reminder_opt_in' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE user ADD COLUMN weekly_reminder_opt_in BOOLEAN DEFAULT 0"
+                    )
+                )
+                conn.commit()
+            insp.close()
+
             insp = conn.execute(text("PRAGMA table_info(email_settings)"))
             columns = [row[1] for row in insp]
             if 'event_signup_user_enabled' not in columns:
@@ -123,7 +139,46 @@ def create_app():
                         "ALTER TABLE email_settings ADD COLUMN event_unregister_admin_text TEXT"
                     )
                 )
+            if 'weekly_reminder_enabled' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_enabled BOOLEAN DEFAULT 0"
+                    )
+                )
+            if 'weekly_reminder_text' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_text TEXT"
+                    )
+                )
+            if 'weekly_reminder_day' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_day INTEGER DEFAULT 0"
+                    )
+                )
+            if 'weekly_reminder_time' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_time TIME"
+                    )
+                )
             conn.commit()
             insp.close()
+
+    # Set up weekly reminder scheduler
+    scheduler = BackgroundScheduler()
+    with app.app_context():
+        settings = EmailSettings.query.first()
+        if settings and settings.weekly_reminder_time:
+            hour = settings.weekly_reminder_time.hour
+            minute = settings.weekly_reminder_time.minute
+        else:
+            hour = 8
+            minute = 0
+        day = settings.weekly_reminder_day if settings else 0
+        trigger = CronTrigger(day_of_week=day, hour=hour, minute=minute)
+        scheduler.add_job(send_weekly_reminders, trigger, args=[app], id="weekly_reminder", replace_existing=True)
+    scheduler.start()
 
     return app

@@ -19,6 +19,13 @@
     </nav>
     <div class="container mt-5">
         <h2>Üdvözlünk, {{ user.username }}!</h2>
+        <form method="post" action="{{ url_for('user.toggle_reminder') }}" class="mb-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="enabled" onchange="this.form.submit()" {% if user.weekly_reminder_opt_in %}checked{% endif %}>
+                <label class="form-check-label">Heti emlékeztető email</label>
+            </div>
+        </form>
         {% if user.role == 'admin' %}
         <div class="mb-3">
             <a href="{{ url_for('admin.create_pass') }}" class="btn btn-success btn-sm">Új bérlet</a>
