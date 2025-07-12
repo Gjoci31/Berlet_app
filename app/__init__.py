@@ -4,8 +4,18 @@ from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 import os
 from dotenv import load_dotenv
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
+import logging
+
+try:
+    from apscheduler.schedulers.background import BackgroundScheduler
+    from apscheduler.triggers.cron import CronTrigger
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    BackgroundScheduler = None
+    CronTrigger = None
+    logging.warning(
+        "APScheduler is not installed. Scheduled tasks will be disabled."
+    )
+
 from .models import EmailSettings
 from .utils import send_weekly_reminders
 
@@ -17,10 +27,12 @@ load_dotenv()
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler() if BackgroundScheduler else None
 
 def update_weekly_reminder_schedule(app):
     """Configure the weekly reminder job based on current settings."""
+    if scheduler is None:
+        return
     with app.app_context():
         settings = EmailSettings.query.first()
         if settings and settings.weekly_reminder_time:
@@ -188,8 +200,9 @@ def create_app():
             conn.commit()
             insp.close()
 
-    # Set up weekly reminder scheduler
-    update_weekly_reminder_schedule(app)
-    scheduler.start()
+    # Set up weekly reminder scheduler if APScheduler is available
+    if scheduler:
+        update_weekly_reminder_schedule(app)
+        scheduler.start()
 
     return app

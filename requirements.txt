@@ -6,4 +6,4 @@ werkzeug
 python-dotenv
 qrcode[pil]
 reportlab
-APScheduler
+APScheduler>=3.10
