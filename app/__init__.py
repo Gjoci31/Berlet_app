@@ -65,6 +65,8 @@ def create_app():
 
         # Use a dedicated connection so ``PRAGMA`` and ``ALTER`` statements work
         # consistently across SQLAlchemy 1.x and 2.x.
+        from .models import PendingUser
+
         with db.engine.connect() as conn:
             # Older databases created before the introduction of the
             # ``password_plain`` and ``weekly_reminder_opt_in`` columns on the
@@ -187,5 +189,14 @@ def create_app():
                 if column_name not in columns:
                     conn.execute(text(statement))
             insp.close()
+
+            # The introduction of the ``PendingUser`` model adds a new table to
+            # the schema. Existing installations that created their database
+            # before this change would otherwise raise
+            # ``sqlite3.OperationalError: no such table: pending_user`` when a
+            # visitor submits the registration form.  Using ``checkfirst`` ensures
+            # that the table is only created when it's actually missing so fresh
+            # installs remain unaffected.
+            PendingUser.__table__.create(bind=conn, checkfirst=True)
 
     return app
