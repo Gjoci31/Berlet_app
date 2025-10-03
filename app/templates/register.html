@@ -23,6 +23,12 @@
         </div>
         {% endif %}
         {% endwith %}
+        {% if confirmation_link %}
+        <div class="alert alert-warning" role="alert">
+            Ha nem érkezett meg az email, másold az alábbi linket a böngésződbe a regisztráció megerősítéséhez:<br>
+            <a href="{{ confirmation_link }}" class="text-break">{{ confirmation_link }}</a>
+        </div>
+        {% endif %}
         <div class="mb-3">
             {{ form.username(class_='form-control', placeholder='Felhasználónév') }}
             {% for error in form.username.errors %}
