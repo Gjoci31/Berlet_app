@@ -128,6 +128,13 @@ def create_app():
                     )
                 )
                 conn.commit()
+            if 'is_final_event' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE event ADD COLUMN is_final_event BOOLEAN DEFAULT 0"
+                    )
+                )
+                conn.commit()
             insp.close()
 
             # Ensure weekly_reminder_opt_in exists on the user table

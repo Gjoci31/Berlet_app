@@ -26,6 +26,10 @@
                 <img src="{{ url_for('static', filename=event.image_path) }}" class="img-fluid mt-2 rounded" style="max-height: 200px;" alt="{{ event.name }}">
                 {% endif %}
             </div>
+            <div class="form-check form-switch mb-3">
+                {{ form.is_final_event(class="form-check-input") }}
+                {{ form.is_final_event.label(class="form-check-label") }}
+            </div>
             <div class="mb-3">{{ form.submit(class="btn btn-primary") }}</div>
         </form>
     </div>

@@ -142,6 +142,7 @@ class EventForm(FlaskForm):
         validators=[DataRequired()],
     )
     image = FileField('Kép feltöltése', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Csak kép tölthető fel.')])
+    is_final_event = BooleanField('Záró esemény (bérlet nem használható)')
     submit = SubmitField('Mentés')
 
 

@@ -126,6 +126,7 @@ class Event(db.Model):
     color = db.Column(db.String(20), nullable=False, default='blue')
     price = db.Column(db.Numeric(10, 2))
     image_path = db.Column(db.String(255))
+    is_final_event = db.Column(db.Boolean, nullable=False, default=False)
     registrations = db.relationship(
         'EventRegistration', backref='event', lazy=True, cascade='all, delete-orphan'
     )

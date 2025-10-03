@@ -20,6 +20,10 @@
             <div class="mb-3">{{ form.price.label }} {{ form.price(class="form-control", placeholder="0") }}</div>
             <div class="mb-3">{{ form.color.label }} {{ form.color(class="form-select") }}</div>
             <div class="mb-3">{{ form.image.label }} {{ form.image(class="form-control") }}</div>
+            <div class="form-check form-switch mb-3">
+                {{ form.is_final_event(class="form-check-input") }}
+                {{ form.is_final_event.label(class="form-check-label") }}
+            </div>
             <div class="mb-3">{{ form.submit(class="btn btn-primary") }}</div>
         </form>
     </div>

@@ -126,7 +126,10 @@ def _promote_waitlist_entry(entry, event=None, remove_on_fail=False):
 
     user = entry.user
     selected_pass = None
-    if entry.registration_type == 'pass':
+    registration_type = entry.registration_type
+    if event.is_final_event:
+        registration_type = 'single'
+    elif registration_type == 'pass':
         selected_pass = _get_available_pass(user, entry.pass_id)
         if not selected_pass:
             if remove_on_fail:
@@ -137,7 +140,7 @@ def _promote_waitlist_entry(entry, event=None, remove_on_fail=False):
     registration = EventRegistration(
         event_id=event.id,
         user_id=user.id,
-        registration_type=entry.registration_type,
+        registration_type=registration_type,
         waitlist_promoted=True,
     )
     if selected_pass:
@@ -222,6 +225,9 @@ def signup(event_id):
         return redirect(url_for('events.events'))
 
     registration_type = request.form.get('registration_type', 'single')
+    if event.is_final_event and registration_type == 'pass':
+        flash('Ez a záró esemény, csak alkalmi jelentkezés engedélyezett.', 'warning')
+        return redirect(url_for('events.events'))
     preferred_pass_id = request.form.get('pass_id', type=int)
     selected_pass = None
     if registration_type == 'pass':
@@ -315,6 +321,9 @@ def join_waitlist(event_id):
         return redirect(url_for('events.events'))
 
     registration_type = request.form.get('registration_type', 'single')
+    if event.is_final_event and registration_type == 'pass':
+        flash('Ez a záró esemény, csak alkalmi jelentkezés engedélyezett.', 'warning')
+        return redirect(url_for('events.events'))
     preferred_pass_id = request.form.get('pass_id', type=int)
     entry_kwargs = {
         'event_id': event_id,
@@ -374,6 +383,7 @@ def create_event():
             capacity=form.capacity.data,
             color=form.color.data,
             price=form.price.data if form.price.data is not None else None,
+            is_final_event=form.is_final_event.data,
         )
         image_path = _save_event_image(form.image.data)
         if image_path:
@@ -408,6 +418,7 @@ def edit_event(event_id):
         event.capacity = form.capacity.data
         event.color = form.color.data
         event.price = form.price.data if form.price.data is not None else None
+        event.is_final_event = form.is_final_event.data
         image_path = _save_event_image(form.image.data)
         if image_path:
             event.image_path = image_path
@@ -416,6 +427,22 @@ def edit_event(event_id):
         return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
     return render_template('edit_event.html', form=form, event=event)
+
+
+@event_bp.route('/admin/events/<int:event_id>/toggle_final', methods=['POST'])
+@login_required
+def toggle_final_event(event_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('events.events'))
+
+    event = Event.query.get_or_404(event_id)
+    event.is_final_event = not event.is_final_event
+    db.session.commit()
+    if event.is_final_event:
+        flash('Az esemény záró programként lett megjelölve. Bérlet nem használható.', 'success')
+    else:
+        flash('Az esemény már nem záró program, újra használható bérlet.', 'success')
+    return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
 
 @event_bp.route('/admin/events/add_user/<int:event_id>', methods=['POST'])
@@ -440,6 +467,9 @@ def add_user(event_id):
 
     selected_pass = None
     if registration_type == 'pass':
+        if event.is_final_event:
+            flash('Ez a záró esemény, csak alkalmi jelentkezés engedélyezett.', 'warning')
+            return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
         selected_pass = _get_available_pass(user)
         if not selected_pass:
             flash('A felhasználónak nincs aktív bérlete.', 'danger')
