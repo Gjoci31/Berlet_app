@@ -111,3 +111,15 @@ def event_unregister_admin_email(username: str, e) -> str:
         f"{_event_details(e)}"
     )
     return base_email_template("Esemény leiratkozás", content)
+
+
+def pass_request_admin_email(user, pass_request) -> str:
+    """Return the email HTML sent to admins when a new pass request arrives."""
+    content = (
+        "Új bérlet igénylés érkezett.<br><br>"
+        f"Felhasználó: {user.username}<br>"
+        f"Email: {user.email}<br>"
+        f"Igényelt bérlet: {pass_request.display_type}<br>"
+        f"Igénylés ideje: {pass_request.created_at.strftime('%Y-%m-%d %H:%M') if pass_request.created_at else '-'}"
+    )
+    return base_email_template("Új bérlet igénylés", content)

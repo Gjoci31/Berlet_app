@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bérlet igénylések</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2 class="mb-4">Bérlet igénylések</h2>
+        <a href="{{ url_for('user.dashboard') }}" class="btn btn-link mb-3">Vissza a dashboardra</a>
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        <div class="mb-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'info' if category == 'message' else category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bezárás"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% if requests %}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Felhasználó</th>
+                        <th>Email</th>
+                        <th>Igényelt bérlet</th>
+                        <th>Állapot</th>
+                        <th>Igénylés ideje</th>
+                        <th>Műveletek</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td>{{ req.user.username }}</td>
+                        <td>{{ req.user.email }}</td>
+                        <td>{{ req.display_type }}</td>
+                        <td>
+                            {% if req.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Függőben</span>
+                            {% elif req.status == 'approved' %}
+                                <span class="badge bg-success">Aktiválva</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Elutasítva</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') if req.created_at else '-' }}</td>
+                        <td>
+                            {% if req.status == 'pending' %}
+                            <form method="post" action="{{ url_for('admin.approve_pass_request', request_id=req.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-success">Aktiválás</button>
+                            </form>
+                            <form method="post" action="{{ url_for('admin.reject_pass_request', request_id=req.id) }}" class="d-inline ms-1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Elutasítás</button>
+                            </form>
+                            {% elif req.status == 'approved' and req.pass_ref %}
+                                <a href="{{ url_for('admin.verify_pass', pass_id=req.pass_ref.id) }}" class="btn btn-sm btn-outline-primary">Bérlet megnyitása</a>
+                            {% else %}
+                                <span class="text-muted">Nincs elérhető művelet</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">Jelenleg nincs bérlet igénylés.</div>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

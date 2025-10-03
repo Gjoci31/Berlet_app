@@ -16,54 +16,17 @@
     font-weight: bold;
 }
 
-.calendar-table td {
-    width: 100px;
-    height: 60px;
-    vertical-align: top;
-    position: relative;
-    padding: 0;
-}
-
-.calendar-event {
-    position: absolute;
-    left: 0;
-    right: 0;
-    background-color: #0d6efd;
-    color: #fff;
-    font-size: 0.75rem;
-    padding: 2px;
-    border-radius: 2px;
+.event-ticket {
+    border: none;
+    border-radius: 12px;
     overflow: hidden;
 }
 
-.calendar-event.with-text {
-    overflow: visible;
-    z-index: 1;
+.event-ticket-image {
+    height: 180px;
+    object-fit: cover;
 }
 
-/* Colors for admin event cards based on status */
-.event-card.past {
-    background-color: #f8d7da;
-}
-.event-card.ongoing {
-    background-color: #fff3cd;
-}
-.event-card.upcoming {
-    background-color: #d1e7dd;
-}
-
-/* Background colors for calendar columns */
-.calendar-table th.weekday,
-.calendar-table td.weekday {
-    background-color: #e9f4ff; /* light blue */
-}
-
-.calendar-table th.saturday,
-.calendar-table td.saturday {
-    background-color: #fff9e6; /* light yellow */
-}
-
-.calendar-table th.sunday,
-.calendar-table td.sunday {
-    background-color: #ffe6e6; /* light red */
+.event-ticket .card-body {
+    background-color: #ffffff;
 }

@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed
 from wtforms import (
     StringField,
     PasswordField,
@@ -10,8 +11,17 @@ from wtforms import (
     TextAreaField,
     BooleanField,
     FileField,
+    DecimalField,
+    RadioField,
 )
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import (
+    DataRequired,
+    NumberRange,
+    Email,
+    Length,
+    EqualTo,
+    Optional,
+)
 
 class PassForm(FlaskForm):
     type = StringField('Típus', validators=[DataRequired()])
@@ -38,8 +48,19 @@ class LoginForm(FlaskForm):
 
 
 class ForgotPasswordForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Jelszó elküldése')
+
+
+class RegistrationForm(FlaskForm):
+    username = StringField('Felhasználónév', validators=[DataRequired(), Length(min=3, max=150)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Jelszó', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField(
+        'Jelszó megerősítése',
+        validators=[DataRequired(), EqualTo('password', message='A jelszavak nem egyeznek.')],
+    )
+    submit = SubmitField('Regisztráció')
 
 
 class EmailSettingsForm(FlaskForm):
@@ -105,6 +126,7 @@ class EventForm(FlaskForm):
     start_time = TimeField('Kezdő időpont', validators=[DataRequired()])
     end_time = TimeField('Vég időpont', validators=[DataRequired()])
     capacity = IntegerField('Létszám', validators=[DataRequired(), NumberRange(min=1)])
+    price = DecimalField('Ár (HUF)', places=2, rounding=None, validators=[Optional(), NumberRange(min=0)])
     color = SelectField(
         'Szín',
         choices=[
@@ -119,4 +141,15 @@ class EventForm(FlaskForm):
         default='blue',
         validators=[DataRequired()],
     )
+    image = FileField('Kép feltöltése', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Csak kép tölthető fel.')])
     submit = SubmitField('Mentés')
+
+
+class PurchasePassForm(FlaskForm):
+    pass_type = RadioField(
+        'Bérlet típusa',
+        choices=[('4', '4 alkalmas'), ('8', '8 alkalmas')],
+        default='4',
+        validators=[DataRequired()],
+    )
+    submit = SubmitField('Bérlet vásárlása')
