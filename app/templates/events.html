@@ -53,6 +53,11 @@
                         {% set latest_reg = latest_registrations.get(event.id) %}
                         {% set waitlist_entry = waitlist_map.get(event.id) %}
                         <div class="mt-auto">
+                            {% if event.is_final_event %}
+                                <div class="alert alert-info small" role="alert">
+                                    Ez a záró program, bérlet nem használható. Jelentkezz külön alkalommal.
+                                </div>
+                            {% endif %}
                             {% if active_reg %}
                                 <form method="post" action="{{ url_for('events.unregister', event_id=event.id) }}">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -68,41 +73,13 @@
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button class="btn btn-outline-secondary w-100">Leiratkozás a várólistáról</button>
                                     </form>
-                                {% elif event.status == 'upcoming' %}
-                                    {% if event.spots_left > 0 %}
-                                        {% if has_active_pass %}
-                                        <form method="post" action="{{ url_for('events.signup', event_id=event.id) }}" class="mb-2">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <input type="hidden" name="registration_type" value="pass">
-                                            <button class="btn btn-primary w-100">Feliratkozom bérlettel</button>
-                                        </form>
-                                        {% endif %}
-                                        <form method="post" action="{{ url_for('events.signup', event_id=event.id) }}">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <input type="hidden" name="registration_type" value="single">
-                                            <button class="btn btn-outline-primary w-100">Feliratkozom alkalommal</button>
-                                        </form>
-                                    {% else %}
-                                        <div class="alert alert-warning small" role="alert">
-                                            Az esemény teltházas. Jelentkezz a várólistára!
-                                        </div>
-                                        {% if has_active_pass %}
-                                        <form method="post" action="{{ url_for('events.join_waitlist', event_id=event.id) }}" class="mb-2">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <input type="hidden" name="registration_type" value="pass">
-                                            <button class="btn btn-primary w-100">Várólista (bérlettel)</button>
-                                        </form>
-                                        {% endif %}
-                                        <form method="post" action="{{ url_for('events.join_waitlist', event_id=event.id) }}">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <input type="hidden" name="registration_type" value="single">
-                                            <button class="btn btn-outline-primary w-100">Várólista (alkalom)</button>
-                                        </form>
+
                                     {% endif %}
                                 {% else %}
                                     <div class="alert alert-secondary small" role="alert">
                                         Ez az esemény már zajlik vagy lezárult, új jelentkezés nem lehetséges.
                                     </div>
+
                                 {% endif %}
                             {% endif %}
                             {% if latest_reg and latest_reg.status != 'active' %}
