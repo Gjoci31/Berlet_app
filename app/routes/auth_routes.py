@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 
@@ -64,10 +64,19 @@ def register():
             registration_confirmation_email(form.username.data, confirmation_link),
             form.email.data,
         ):
-            db.session.delete(pending_user)
-            db.session.commit()
-            flash('Nem sikerült a megerősítő email elküldése. Kérjük próbáld meg később.', 'danger')
-            return render_template('register.html', form=form)
+            current_app.logger.warning(
+                'Nem sikerült regisztrációs megerősítő e-mailt küldeni erre a címre: %s',
+                form.email.data,
+            )
+            flash(
+                'Nem sikerült a megerősítő email elküldése. Az alábbi link használatával tudod befejezni a regisztrációt.',
+                'warning',
+            )
+            return render_template(
+                'register.html',
+                form=form,
+                confirmation_link=confirmation_link,
+            )
 
         flash('A regisztráció véglegesítéséhez kattints a megerősítő emailben található linkre.', 'success')
         return redirect(url_for('auth.login'))
