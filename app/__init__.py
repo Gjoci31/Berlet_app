@@ -63,7 +63,7 @@ def create_app():
         # compatible with SQLAlchemy 1.x.
         from sqlalchemy import text
 
-        with db.engine.connect() as conn:
+
             # Older databases created before the introduction of the
             # ``password_plain`` and ``weekly_reminder_opt_in`` columns on the
             # ``user`` table will raise ``sqlite3.OperationalError`` when SQLAlchemy
@@ -71,21 +71,7 @@ def create_app():
             # 500 error when a new user registers. Ensure the columns exist so the
             # registration flow works on upgraded installations without a manual
             # migration step.
-            insp = conn.execute(text("PRAGMA table_info(user)"))
-            columns = [row[1] for row in insp]
-            if 'password_plain' not in columns:
-                conn.execute(
-                    text("ALTER TABLE user ADD COLUMN password_plain VARCHAR(150)")
-                )
-                conn.commit()
-            if 'weekly_reminder_opt_in' not in columns:
-                conn.execute(
-                    text(
-                        "ALTER TABLE user ADD COLUMN weekly_reminder_opt_in BOOLEAN DEFAULT 0"
-                    )
-                )
-                conn.commit()
-            insp.close()
+
 
             insp = conn.execute(text("PRAGMA table_info(event)"))
             columns = [row[1] for row in insp]
@@ -95,28 +81,24 @@ def create_app():
                         "ALTER TABLE event ADD COLUMN color VARCHAR(20) DEFAULT 'blue'"
                     )
                 )
-                conn.commit()
             if 'price' not in columns:
                 conn.execute(
                     text(
                         "ALTER TABLE event ADD COLUMN price NUMERIC(10, 2)"
                     )
                 )
-                conn.commit()
             if 'image_path' not in columns:
                 conn.execute(
                     text(
                         "ALTER TABLE event ADD COLUMN image_path VARCHAR(255)"
                     )
                 )
-                conn.commit()
             if 'is_final_event' not in columns:
                 conn.execute(
                     text(
                         "ALTER TABLE event ADD COLUMN is_final_event BOOLEAN DEFAULT 0"
                     )
                 )
-                conn.commit()
             insp.close()
 
             insp = conn.execute(text("PRAGMA table_info(email_settings)"))
@@ -188,7 +170,6 @@ def create_app():
             for column_name, statement in registration_columns.items():
                 if column_name not in columns:
                     conn.execute(text(statement))
-                    conn.commit()
             insp.close()
 
     return app
