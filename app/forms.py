@@ -17,11 +17,53 @@ from wtforms import (
 from wtforms.validators import (
     DataRequired,
     NumberRange,
-    Email,
     Length,
     EqualTo,
     Optional,
+    ValidationError,
 )
+import re
+
+try:
+    from email_validator import validate_email, EmailNotValidError
+except ImportError:  # pragma: no cover - optional dependency during runtime
+    validate_email = None
+    class EmailNotValidError(Exception):
+        pass
+
+
+class SafeEmail:
+    """Validate email addresses without crashing if ``email_validator`` is missing.
+
+    WTForms' built-in :class:`~wtforms.validators.Email` validator depends on the
+    third-party ``email_validator`` package and raises a generic ``Exception``
+    when it is not installed.  In production this manifests as a 500 error when
+    submitting forms such as registration.  ``SafeEmail`` performs a best-effort
+    validation: when ``email_validator`` is available it delegates to the
+    library, otherwise it falls back to a minimal regular-expression check so the
+    request fails gracefully with a validation message instead of crashing the
+    application.
+    """
+
+    _regex = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+    def __init__(self, message: str | None = None) -> None:
+        self.message = message or 'Érvénytelen email cím.'
+
+    def __call__(self, form, field) -> None:
+        data = (field.data or '').strip()
+        if not data:
+            raise ValidationError(self.message)
+
+        if validate_email:
+            try:
+                validate_email(data)
+            except EmailNotValidError as exc:  # pragma: no cover - exercised in runtime
+                raise ValidationError(self.message) from exc
+            return
+
+        if not self._regex.match(data):
+            raise ValidationError(self.message)
 
 class PassForm(FlaskForm):
     type = StringField('Típus', validators=[DataRequired()])
@@ -48,13 +90,13 @@ class LoginForm(FlaskForm):
 
 
 class ForgotPasswordForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[DataRequired(), SafeEmail()])
     submit = SubmitField('Jelszó elküldése')
 
 
 class RegistrationForm(FlaskForm):
     username = StringField('Felhasználónév', validators=[DataRequired(), Length(min=3, max=150)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[DataRequired(), SafeEmail()])
     password = PasswordField('Jelszó', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField(
         'Jelszó megerősítése',
