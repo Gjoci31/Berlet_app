@@ -116,6 +116,24 @@ class EmailSettings(db.Model):
     weekly_reminder_time = db.Column(db.Time)
 
 
+class PendingUser(db.Model):
+    """Temporary storage for users awaiting email verification."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    password_plain = db.Column(db.String(150))
+    token = db.Column(db.String(128), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def set_password(self, password: str) -> None:
+        """Store the password in both hashed and plain form."""
+
+        self.password_hash = generate_password_hash(password)
+        self.password_plain = password
+
+
 class Event(db.Model):
     """Calendar event which users can sign up for."""
     id = db.Column(db.Integer, primary_key=True)
