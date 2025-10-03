@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from .. import db
 from ..forms import PurchasePassForm
-from ..models import Pass, PassRequest
+from ..models import Pass, PassRequest, User
+from ..email_templates import pass_request_admin_email
+from ..utils import send_email
 
 
 user_bp = Blueprint('user', __name__)
@@ -41,15 +43,6 @@ def dashboard():
     )
 
 
-@user_bp.route('/toggle_reminder', methods=['POST'])
-@login_required
-def toggle_reminder():
-    current_user.weekly_reminder_opt_in = not current_user.weekly_reminder_opt_in
-    db.session.commit()
-    next_url = request.referrer or url_for('user.dashboard')
-    return redirect(next_url)
-
-
 @user_bp.route('/passes/purchase', methods=['GET', 'POST'])
 @login_required
 def purchase_pass():
@@ -58,6 +51,25 @@ def purchase_pass():
 
     form = PurchasePassForm()
     if form.validate_on_submit():
+        existing_pending = PassRequest.query.filter_by(
+            user_id=current_user.id, status='pending'
+        ).first()
+        if existing_pending:
+            flash('Már van feldolgozás alatt lévő bérlet igénylésed.', 'warning')
+            return redirect(url_for('user.dashboard'))
 
+        pass_request = PassRequest(
+            user_id=current_user.id,
+            requested_uses=int(form.pass_type.data),
+        )
+        db.session.add(pass_request)
+        db.session.commit()
+
+        admins = User.query.filter_by(role='admin').all()
+        html = pass_request_admin_email(current_user, pass_request)
+        for admin in admins:
+            send_email('Új bérlet igénylés', html, admin.email)
+
+        flash('Bérlet igénylésed rögzítettük.', 'success')
         return redirect(url_for('user.dashboard'))
     return render_template('purchase_pass.html', form=form)

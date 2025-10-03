@@ -4,18 +4,6 @@ from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 import os
 from dotenv import load_dotenv
-import logging
-from zoneinfo import ZoneInfo
-
-try:
-    from apscheduler.schedulers.background import BackgroundScheduler
-    from apscheduler.triggers.cron import CronTrigger
-except ModuleNotFoundError:  # pragma: no cover - optional dependency
-    BackgroundScheduler = None
-    CronTrigger = None
-    logging.warning(
-        "APScheduler is not installed. Scheduled tasks will be disabled."
-    )
 
 
 # Load environment variables from a .env file if present. This allows the
@@ -26,35 +14,6 @@ load_dotenv()
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
-scheduler = (
-    BackgroundScheduler(timezone=ZoneInfo("Europe/Budapest"))
-    if BackgroundScheduler
-    else None
-)
-
-def update_weekly_reminder_schedule(app):
-    """Configure the weekly reminder job based on current settings."""
-    if scheduler is None:
-        return
-    from .models import EmailSettings  # Local import to avoid circular dependency
-    with app.app_context():
-        settings = EmailSettings.query.first()
-        if settings and settings.weekly_reminder_time:
-            hour = settings.weekly_reminder_time.hour
-            minute = settings.weekly_reminder_time.minute
-        else:
-            hour = 8
-            minute = 0
-        day = settings.weekly_reminder_day if settings else 0
-        trigger = CronTrigger(day_of_week=day, hour=hour, minute=minute)
-    from .utils import send_weekly_reminders  # Local import to avoid circular dependency
-    scheduler.add_job(
-        send_weekly_reminders,
-        trigger,
-        args=[app],
-        id="weekly_reminder",
-        replace_existing=True,
-    )
 
 
 def create_app():
@@ -137,18 +96,6 @@ def create_app():
                 conn.commit()
             insp.close()
 
-            # Ensure weekly_reminder_opt_in exists on the user table
-            insp = conn.execute(text("PRAGMA table_info(user)"))
-            columns = [row[1] for row in insp]
-            if 'weekly_reminder_opt_in' not in columns:
-                conn.execute(
-                    text(
-                        "ALTER TABLE user ADD COLUMN weekly_reminder_opt_in BOOLEAN DEFAULT 0"
-                    )
-                )
-                conn.commit()
-            insp.close()
-
             insp = conn.execute(text("PRAGMA table_info(email_settings)"))
             columns = [row[1] for row in insp]
             if 'event_signup_user_enabled' not in columns:
@@ -199,31 +146,8 @@ def create_app():
                         "ALTER TABLE email_settings ADD COLUMN event_unregister_admin_text TEXT"
                     )
                 )
-            if 'weekly_reminder_enabled' not in columns:
-                conn.execute(
-                    text(
-                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_enabled BOOLEAN DEFAULT 0"
-                    )
-                )
-            if 'weekly_reminder_text' not in columns:
-                conn.execute(
-                    text(
-                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_text TEXT"
-                    )
-                )
-            if 'weekly_reminder_day' not in columns:
-                conn.execute(
-                    text(
-                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_day INTEGER DEFAULT 0"
-                    )
-                )
-            if 'weekly_reminder_time' not in columns:
-                conn.execute(
-                    text(
-                        "ALTER TABLE email_settings ADD COLUMN weekly_reminder_time TIME"
-                    )
-                )
-                conn.commit()
+            # Legacy weekly reminder columns are intentionally not created on new
+            # installations now that the feature has been removed.
             insp.close()
 
             insp = conn.execute(text("PRAGMA table_info(event_registration)"))
@@ -243,10 +167,5 @@ def create_app():
                     conn.execute(text(statement))
                     conn.commit()
             insp.close()
-
-    # Set up weekly reminder scheduler if APScheduler is available
-    if scheduler:
-        update_weekly_reminder_schedule(app)
-        scheduler.start()
 
     return app

@@ -1,16 +1,16 @@
-from datetime import date
+"""Legacy entry point for the removed weekly reminder feature.
 
-from app import create_app
-from app.models import EmailSettings
-from app.utils import send_weekly_reminders
+The original application scheduled this module to run periodically to send
+emails.  The customer no longer needs weekly reminders, so the script simply
+logs a short notice instead of touching the database or sending mail.
+"""
 
-app = create_app()
+import logging
 
-with app.app_context():
-    settings = EmailSettings.query.first()
-    if (
-        settings
-        and settings.weekly_reminder_enabled
-        and settings.weekly_reminder_day == date.today().weekday()
-    ):
-        send_weekly_reminders(app)
+
+def main() -> None:
+    logging.info("Weekly reminder funkció letiltva, nincs teendő.")
+
+
+if __name__ == "__main__":
+    main()

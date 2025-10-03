@@ -40,7 +40,7 @@
                                 <div class="text-danger small mt-1">{{ form.pass_type.errors[0] }}</div>
                                 {% endif %}
                             </div>
-
+                            {{ form.submit(class_='btn btn-primary w-100') }}
                         </form>
                         <a href="{{ url_for('user.dashboard') }}" class="btn btn-link w-100 mt-2">Vissza a főoldalra</a>
                     </div>
