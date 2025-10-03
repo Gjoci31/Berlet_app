@@ -12,9 +12,9 @@ from flask_login import login_required, current_user
 import os
 import shutil
 
-from ..models import Pass, PassUsage, User, db, EmailSettings
+from ..models import Pass, PassRequest, PassUsage, User, db, EmailSettings
 from ..forms import PassForm, UserForm, EmailSettingsForm, RestoreForm
-from ..utils import send_event_email
+from ..utils import send_email, send_event_email
 from .. import update_weekly_reminder_schedule
 from ..email_templates import (
     pass_created_email,
@@ -24,7 +24,7 @@ from ..email_templates import (
     registration_email,
     base_email_template,
 )
-from datetime import date
+from datetime import date, datetime, timedelta
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -60,6 +60,79 @@ def create_pass():
         return redirect(url_for('user.dashboard'))
 
     return render_template('create_pass.html', form=form)
+
+
+@admin_bp.route('/pass_requests')
+@login_required
+def pass_requests():
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    requests = (
+        PassRequest.query.order_by(PassRequest.created_at.desc()).all()
+    )
+    return render_template('admin_pass_requests.html', requests=requests)
+
+
+@admin_bp.route('/pass_requests/<int:request_id>/approve', methods=['POST'])
+@login_required
+def approve_pass_request(request_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    pass_request = PassRequest.query.get_or_404(request_id)
+    if pass_request.status != 'pending':
+        flash('Ez az igénylés már feldolgozásra került.', 'warning')
+        return redirect(url_for('admin.pass_requests'))
+
+    start = date.today()
+    end = start + timedelta(days=90)
+    new_pass = Pass(
+        type=pass_request.display_type,
+        start_date=start,
+        end_date=end,
+        total_uses=pass_request.requested_uses,
+        used=0,
+        user_id=pass_request.user_id,
+        comment='Igénylés alapján aktiválva',
+    )
+    db.session.add(new_pass)
+    db.session.flush()
+
+    pass_request.status = 'approved'
+    pass_request.processed_at = datetime.utcnow()
+    pass_request.pass_id = new_pass.id
+
+    db.session.commit()
+
+    send_event_email(
+        'pass_created',
+        'Új bérlet',
+        pass_created_email(new_pass),
+        pass_request.user.email,
+    )
+
+    flash('Bérlet aktiválva és a felhasználó értesítve.', 'success')
+    return redirect(url_for('admin.pass_requests'))
+
+
+@admin_bp.route('/pass_requests/<int:request_id>/reject', methods=['POST'])
+@login_required
+def reject_pass_request(request_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    pass_request = PassRequest.query.get_or_404(request_id)
+    if pass_request.status != 'pending':
+        flash('Ez az igénylés már feldolgozásra került.', 'warning')
+        return redirect(url_for('admin.pass_requests'))
+
+    pass_request.status = 'rejected'
+    pass_request.processed_at = datetime.utcnow()
+    db.session.commit()
+
+    flash('A bérlet igénylés elutasításra került.', 'info')
+    return redirect(url_for('admin.pass_requests'))
 
 
 @admin_bp.route('/extend_pass/<int:pass_id>', methods=['GET', 'POST'])

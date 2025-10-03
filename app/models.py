@@ -17,6 +17,12 @@ class User(UserMixin, db.Model):
     passes = db.relationship(
         'Pass', backref='user', lazy=True, cascade='all, delete-orphan'
     )
+    pass_requests = db.relationship(
+        'PassRequest',
+        backref='user',
+        lazy=True,
+        cascade='all, delete-orphan',
+    )
     event_registrations = db.relationship(
         'EventRegistration', backref='user', lazy=True, cascade='all, delete-orphan'
     )
@@ -49,6 +55,22 @@ class PassUsage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pass_id = db.Column(db.Integer, db.ForeignKey('pass.id'), nullable=False)
     used_on = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class PassRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    requested_uses = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+    pass_id = db.Column(db.Integer, db.ForeignKey('pass.id'))
+
+    pass_ref = db.relationship('Pass')
+
+    @property
+    def display_type(self) -> str:
+        return f"{self.requested_uses} alkalmas bérlet"
 
 
 @login_manager.user_loader
