@@ -113,7 +113,7 @@ def _cancel_registration(registration, force_late=None):
 def _promote_waitlist_entry(entry, event=None, remove_on_fail=False):
     """Promote a single waitlist entry to an active registration."""
     event = event or entry.event
-    if not event or event.spots_left <= 0:
+    if not event or event.status != 'upcoming' or event.spots_left <= 0:
         return False
 
     if EventRegistration.query.filter_by(
@@ -160,6 +160,9 @@ def _promote_waitlist(event_id: int):
     """Move the first waitlisted users into the event if space allows."""
     event = Event.query.get(event_id)
     if not event:
+        return
+
+    if event.status != 'upcoming':
         return
 
     while event.spots_left > 0:
@@ -211,6 +214,11 @@ def events():
 @login_required
 def signup(event_id):
     event = Event.query.get_or_404(event_id)
+    now = datetime.utcnow()
+    if event.start_time <= now:
+        flash('Ez az esemény már elkezdődött vagy lezajlott.', 'warning')
+        return redirect(url_for('events.events'))
+
     if EventRegistration.query.filter_by(
         event_id=event_id, user_id=current_user.id, status='active'
     ).first():
@@ -297,6 +305,11 @@ def unregister(event_id):
 @login_required
 def join_waitlist(event_id):
     event = Event.query.get_or_404(event_id)
+
+    now = datetime.utcnow()
+    if event.start_time <= now:
+        flash('Ez az esemény már elkezdődött vagy lezajlott.', 'warning')
+        return redirect(url_for('events.events'))
 
     if EventRegistration.query.filter_by(
         event_id=event_id, user_id=current_user.id, status='active'
