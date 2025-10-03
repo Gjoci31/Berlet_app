@@ -152,4 +152,4 @@ class PurchasePassForm(FlaskForm):
         default='4',
         validators=[DataRequired()],
     )
-    submit = SubmitField('Bérlet vásárlása')
+    submit = SubmitField('Igénylés elküldése')
