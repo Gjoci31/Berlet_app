@@ -15,7 +15,6 @@ import shutil
 from ..models import Pass, PassRequest, PassUsage, User, db, EmailSettings
 from ..forms import PassForm, UserForm, EmailSettingsForm, RestoreForm
 from ..utils import send_email, send_event_email
-from .. import update_weekly_reminder_schedule
 from ..email_templates import (
     pass_created_email,
     pass_deleted_email,
@@ -370,7 +369,6 @@ def email_settings():
     if form.validate_on_submit():
         form.populate_obj(settings)
         db.session.commit()
-        update_weekly_reminder_schedule(current_app)
         flash("Beállítások mentve.", "success")
         return redirect(url_for('user.dashboard'))
 

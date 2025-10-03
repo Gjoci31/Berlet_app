@@ -7,7 +7,7 @@ import os
 import logging
 import re
 from .email_templates import base_email_template
-from .models import EmailSettings, User, db
+from .models import EmailSettings
 
 def generate_qr_code(data: str) -> str:
     qr = qrcode.QRCode(version=1, box_size=6, border=2)
@@ -108,13 +108,5 @@ def send_event_email(event, subject, default_html, to_email):
 
 
 def send_weekly_reminders(app):
-    """Send weekly reminder emails to opted-in users."""
-    with app.app_context():
-        settings = EmailSettings.query.first()
-        if not settings or not settings.weekly_reminder_enabled:
-            return
-        text = settings.weekly_reminder_text or "Emlékeztető"
-        html = base_email_template("Heti emlékeztető", text)
-        recipients = User.query.filter_by(weekly_reminder_opt_in=True).all()
-        for user in recipients:
-            send_email("Heti emlékeztető", html, user.email)
+    """Legacy no-op kept for backwards compatibility."""
+    logging.info("Weekly reminder funkció letiltva, nincs teendő.")
