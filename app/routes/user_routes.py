@@ -1,10 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_required, current_user
 
-from ..models import Pass, PassRequest, User, db
-from ..forms import PurchasePassForm
-from ..utils import send_email
-from ..email_templates import pass_request_admin_email
 
 user_bp = Blueprint('user', __name__)
 
@@ -58,24 +52,6 @@ def purchase_pass():
 
     form = PurchasePassForm()
     if form.validate_on_submit():
-        existing_pending = PassRequest.query.filter_by(
-            user_id=current_user.id, status='pending'
-        ).first()
-        if existing_pending:
-            flash('Már van függő bérlet igénylésed. Várd meg, míg az admin feldolgozza.', 'warning')
-            return redirect(url_for('user.dashboard'))
 
-        uses = int(form.pass_type.data)
-        pass_request = PassRequest(user_id=current_user.id, requested_uses=uses)
-        db.session.add(pass_request)
-        db.session.commit()
-        admins = User.query.filter_by(role='admin').all()
-        for admin in admins:
-            send_email(
-                'Új bérlet igénylés',
-                pass_request_admin_email(current_user, pass_request),
-                admin.email,
-            )
-        flash('Bérlet igénylésed rögzítettük. Az admin felveszi veled a kapcsolatot a fizetéshez.', 'success')
         return redirect(url_for('user.dashboard'))
     return render_template('purchase_pass.html', form=form)
