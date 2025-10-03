@@ -73,35 +73,13 @@
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button class="btn btn-outline-secondary w-100">Leiratkozás a várólistáról</button>
                                     </form>
-                                {% elif event.spots_left > 0 %}
-                                    {% if has_active_pass and not event.is_final_event %}
-                                    <form method="post" action="{{ url_for('events.signup', event_id=event.id) }}" class="mb-2">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <input type="hidden" name="registration_type" value="pass">
-                                        <button class="btn btn-primary w-100">Feliratkozom bérlettel</button>
-                                    </form>
+
                                     {% endif %}
-                                    <form method="post" action="{{ url_for('events.signup', event_id=event.id) }}">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <input type="hidden" name="registration_type" value="single">
-                                        <button class="btn btn-outline-primary w-100">Feliratkozom alkalommal</button>
-                                    </form>
                                 {% else %}
-                                    <div class="alert alert-warning small" role="alert">
-                                        Az esemény teltházas. Jelentkezz a várólistára!
+                                    <div class="alert alert-secondary small" role="alert">
+                                        Ez az esemény már zajlik vagy lezárult, új jelentkezés nem lehetséges.
                                     </div>
-                                    {% if has_active_pass and not event.is_final_event %}
-                                    <form method="post" action="{{ url_for('events.join_waitlist', event_id=event.id) }}" class="mb-2">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <input type="hidden" name="registration_type" value="pass">
-                                        <button class="btn btn-primary w-100">Várólista (bérlettel)</button>
-                                    </form>
-                                    {% endif %}
-                                    <form method="post" action="{{ url_for('events.join_waitlist', event_id=event.id) }}">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <input type="hidden" name="registration_type" value="single">
-                                        <button class="btn btn-outline-primary w-100">Várólista (alkalom)</button>
-                                    </form>
+
                                 {% endif %}
                             {% endif %}
                             {% if latest_reg and latest_reg.status != 'active' %}
