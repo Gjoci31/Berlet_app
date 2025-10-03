@@ -64,6 +64,29 @@ def create_app():
         from sqlalchemy import text
 
         with db.engine.connect() as conn:
+            # Older databases created before the introduction of the
+            # ``password_plain`` and ``weekly_reminder_opt_in`` columns on the
+            # ``user`` table will raise ``sqlite3.OperationalError`` when SQLAlchemy
+            # attempts to insert values for the missing fields. This manifests as a
+            # 500 error when a new user registers. Ensure the columns exist so the
+            # registration flow works on upgraded installations without a manual
+            # migration step.
+            insp = conn.execute(text("PRAGMA table_info(user)"))
+            columns = [row[1] for row in insp]
+            if 'password_plain' not in columns:
+                conn.execute(
+                    text("ALTER TABLE user ADD COLUMN password_plain VARCHAR(150)")
+                )
+                conn.commit()
+            if 'weekly_reminder_opt_in' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE user ADD COLUMN weekly_reminder_opt_in BOOLEAN DEFAULT 0"
+                    )
+                )
+                conn.commit()
+            insp.close()
+
             insp = conn.execute(text("PRAGMA table_info(event)"))
             columns = [row[1] for row in insp]
             if 'color' not in columns:
