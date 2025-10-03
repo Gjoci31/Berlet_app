@@ -102,6 +102,8 @@ class Event(db.Model):
     end_time = db.Column(db.DateTime, nullable=False)
     capacity = db.Column(db.Integer, nullable=False)
     color = db.Column(db.String(20), nullable=False, default='blue')
+    price = db.Column(db.Numeric(10, 2))
+    image_path = db.Column(db.String(255))
     registrations = db.relationship(
         'EventRegistration', backref='event', lazy=True, cascade='all, delete-orphan'
     )
@@ -123,7 +125,8 @@ class Event(db.Model):
 
     @property
     def spots_left(self) -> int:
-        return self.capacity - len(self.registrations)
+        active = [reg for reg in self.registrations if reg.status == 'active']
+        return self.capacity - len(active)
 
     @property
     def formatted_time(self) -> str:
@@ -160,11 +163,33 @@ class EventRegistration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    # ``User.event_registrations`` already adds a backref named ``user``
-    # so defining another relationship with the same name causes a
-    # ``sqlalchemy.exc.ArgumentError`` during mapper configuration.  The
-    # backref automatically provides the ``user`` attribute on
-    # ``EventRegistration`` instances, so the explicit relationship here is
-    # unnecessary and leads to conflicts when the models are imported.
+    registration_type = db.Column(db.String(20), nullable=False, default='single')
+    status = db.Column(db.String(20), nullable=False, default='active')
+    pass_id = db.Column(db.Integer, db.ForeignKey('pass.id'))
+    pass_usage_id = db.Column(db.Integer, db.ForeignKey('pass_usage.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    cancelled_at = db.Column(db.DateTime)
+    is_late_cancel = db.Column(db.Boolean, default=False)
+    waitlist_promoted = db.Column(db.Boolean, default=False)
+    pass_usage = db.relationship('PassUsage', foreign_keys=[pass_usage_id])
+
+
+class EventWaitlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    registration_type = db.Column(db.String(20), nullable=False, default='single')
+    pass_id = db.Column(db.Integer, db.ForeignKey('pass.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    event = db.relationship(
+        'Event', backref=db.backref('waitlist_entries', cascade='all, delete-orphan', lazy=True)
+    )
+    user = db.relationship('User')
+    pass_ref = db.relationship('Pass')
+
+    __table_args__ = (
+        db.UniqueConstraint('event_id', 'user_id', name='uq_event_waitlist_user'),
+    )
 
 
