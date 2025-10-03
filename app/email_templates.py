@@ -17,6 +17,16 @@ def registration_email(username: str, password: str) -> str:
     return base_email_template("Fiók létrehozva", content)
 
 
+def registration_confirmation_email(username: str, confirmation_url: str) -> str:
+    content = (
+        f"Kedves {username},<br><br>"
+        "A regisztráció befejezéséhez kattints az alábbi linkre:<br>"
+        f"<a href='{confirmation_url}'>{confirmation_url}</a><br><br>"
+        "Ha nem te kezdeményezted a regisztrációt, kérjük hagyd figyelmen kívül ezt az üzenetet."
+    )
+    return base_email_template("Regisztráció megerősítése", content)
+
+
 def forgot_password_email(username: str, password: str) -> str:
     content = (
         f"Kedves {username},<br><br>"
