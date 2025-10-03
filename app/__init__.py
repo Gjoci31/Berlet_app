@@ -63,23 +63,7 @@ def create_app():
         # compatible with SQLAlchemy 1.x.
         from sqlalchemy import text
 
-        def _ensure_column(conn, table: str, column: str, ddl: str) -> None:
-            """Create *column* on *table* if it does not yet exist.
 
-            Using ``engine.begin()`` ensures the DDL statements are committed on
-            SQLAlchemy 1.x (which lacks ``Connection.commit``) and 2.x alike.
-            ``PRAGMA table_info`` only returns rows while the cursor is open, so
-            consume it eagerly before issuing another statement on the same
-            connection.
-            """
-
-            result = conn.execute(text(f"PRAGMA table_info({table})"))
-            columns = [row[1] for row in result]
-            result.close()
-            if column not in columns:
-                conn.execute(text(ddl))
-
-        with db.engine.begin() as conn:
             # Older databases created before the introduction of the
             # ``password_plain`` and ``weekly_reminder_opt_in`` columns on the
             # ``user`` table will raise ``sqlite3.OperationalError`` when SQLAlchemy
@@ -87,18 +71,7 @@ def create_app():
             # 500 error when a new user registers. Ensure the columns exist so the
             # registration flow works on upgraded installations without a manual
             # migration step.
-            _ensure_column(
-                conn,
-                'user',
-                'password_plain',
-                "ALTER TABLE user ADD COLUMN password_plain VARCHAR(150)",
-            )
-            _ensure_column(
-                conn,
-                'user',
-                'weekly_reminder_opt_in',
-                "ALTER TABLE user ADD COLUMN weekly_reminder_opt_in BOOLEAN DEFAULT 0",
-            )
+
 
             insp = conn.execute(text("PRAGMA table_info(event)"))
             columns = [row[1] for row in insp]
