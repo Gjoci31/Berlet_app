@@ -114,6 +114,20 @@ def create_app():
                     )
                 )
                 conn.commit()
+            if 'price' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE event ADD COLUMN price NUMERIC(10, 2)"
+                    )
+                )
+                conn.commit()
+            if 'image_path' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE event ADD COLUMN image_path VARCHAR(255)"
+                    )
+                )
+                conn.commit()
             insp.close()
 
             # Ensure weekly_reminder_opt_in exists on the user table
@@ -202,7 +216,25 @@ def create_app():
                         "ALTER TABLE email_settings ADD COLUMN weekly_reminder_time TIME"
                     )
                 )
-            conn.commit()
+                conn.commit()
+            insp.close()
+
+            insp = conn.execute(text("PRAGMA table_info(event_registration)"))
+            columns = [row[1] for row in insp]
+            registration_columns = {
+                'registration_type': "ALTER TABLE event_registration ADD COLUMN registration_type VARCHAR(20) DEFAULT 'single'",
+                'status': "ALTER TABLE event_registration ADD COLUMN status VARCHAR(20) DEFAULT 'active'",
+                'pass_id': "ALTER TABLE event_registration ADD COLUMN pass_id INTEGER REFERENCES pass(id)",
+                'pass_usage_id': "ALTER TABLE event_registration ADD COLUMN pass_usage_id INTEGER REFERENCES pass_usage(id)",
+                'created_at': "ALTER TABLE event_registration ADD COLUMN created_at DATETIME",
+                'cancelled_at': "ALTER TABLE event_registration ADD COLUMN cancelled_at DATETIME",
+                'is_late_cancel': "ALTER TABLE event_registration ADD COLUMN is_late_cancel BOOLEAN DEFAULT 0",
+                'waitlist_promoted': "ALTER TABLE event_registration ADD COLUMN waitlist_promoted BOOLEAN DEFAULT 0",
+            }
+            for column_name, statement in registration_columns.items():
+                if column_name not in columns:
+                    conn.execute(text(statement))
+                    conn.commit()
             insp.close()
 
     # Set up weekly reminder scheduler if APScheduler is available

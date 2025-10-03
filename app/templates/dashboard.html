@@ -37,10 +37,11 @@
         {% endif %}
         <div class="mb-3">
             {% if user.role == 'admin' %}
-            <a href="{{ url_for('events.admin_events') }}" class="btn btn-warning btn-sm">Időpontok</a>
-            <a href="{{ url_for('events.events') }}" class="btn btn-warning btn-sm ms-2">Naptár</a>
+            <a href="{{ url_for('events.admin_events') }}" class="btn btn-warning btn-sm">Események kezelése</a>
+            <a href="{{ url_for('events.events') }}" class="btn btn-warning btn-sm ms-2">Események</a>
             {% else %}
-            <a href="{{ url_for('events.events') }}" class="btn btn-warning btn-sm">Időpontok</a>
+            <a href="{{ url_for('events.events') }}" class="btn btn-warning btn-sm">Események</a>
+            <a href="{{ url_for('user.purchase_pass') }}" class="btn btn-success btn-sm ms-2">Bérlet vásárlása</a>
             {% endif %}
         </div>
         <div class="row">
