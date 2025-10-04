@@ -110,6 +110,9 @@ class EmailSettings(db.Model):
     event_unregister_admin_enabled = db.Column(db.Boolean, default=False)
     event_unregister_admin_text = db.Column(db.Text)
 
+    event_reminder_enabled = db.Column(db.Boolean, default=False)
+    event_reminder_text = db.Column(db.Text)
+
     weekly_reminder_enabled = db.Column(db.Boolean, default=False)
     weekly_reminder_text = db.Column(db.Text)
     weekly_reminder_day = db.Column(db.Integer, default=0)
@@ -212,6 +215,8 @@ class EventRegistration(db.Model):
     cancelled_at = db.Column(db.DateTime)
     is_late_cancel = db.Column(db.Boolean, default=False)
     waitlist_promoted = db.Column(db.Boolean, default=False)
+    reminder_sent = db.Column(db.Boolean, default=False)
+    pass_deduction_notified = db.Column(db.Boolean, default=False)
     pass_usage = db.relationship('PassUsage', foreign_keys=[pass_usage_id])
 
 

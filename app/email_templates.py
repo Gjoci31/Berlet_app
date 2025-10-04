@@ -53,12 +53,19 @@ def pass_deleted_email(username: str, pass_type: str, start, end, used) -> str:
     return base_email_template("Bérlet törölve", content)
 
 
-def pass_used_email(p) -> str:
+def pass_used_email(p, event=None) -> str:
     """Return the email HTML when a pass usage changes."""
     remaining = p.total_uses - p.used
+    if event:
+        intro = (
+            "Lezárult az alábbi esemény, és egy alkalom levonásra került a bérletedből.<br>"
+            f"{_event_details(event)}<br><br>"
+        )
+    else:
+        intro = f"Felhasználtál egy alkalmat a(z) {p.type} bérletedből.<br>"
     content = (
         f"Kedves {p.user.username},<br>"
-        f"Felhasználtál egy alkalmat a(z) {p.type} bérletedből.<br>"
+        f"{intro}"
         f"Hátralévő alkalmak: {remaining}.<br><br>"
         f"{_pass_details(p)}"
     )
@@ -103,14 +110,45 @@ def event_signup_admin_email(username: str, e) -> str:
     return base_email_template("Esemény jelentkezés", content)
 
 
-def event_unregister_user_email(username: str, e) -> str:
+def event_unregister_user_email(
+    username: str,
+    e,
+    used_pass: bool = False,
+    late_cancel: bool = False,
+    deduction_kept: bool = False,
+) -> str:
     """Return the email HTML when a user unregisters from an event."""
     content = (
         f"Kedves {username},<br><br>"
         f"Sikeresen leiratkoztál a következő eseményről:<br>"
         f"{_event_details(e)}"
     )
+    if used_pass:
+        if late_cancel:
+            interval_text = "48 órán belül"
+        else:
+            interval_text = "48 órán kívül"
+        if deduction_kept:
+            deduction_text = "Az alkalom levonva marad a bérletedből."
+        else:
+            deduction_text = "Az alkalmat visszaadtuk a bérletedhez."
+        content += (
+            f"<br><br>A lemondás {interval_text} történt, ezért {deduction_text}"
+        )
+    else:
+        content += (
+            "<br><br>A lemondáshoz nem használtál bérletet, így nem történt levonás."
+        )
     return base_email_template("Esemény leiratkozás", content)
+
+
+def event_reminder_email(e) -> str:
+    """Return the reminder email sent 24 hours before an event."""
+    content = (
+        "1 nap múlva kezdődik az esemény amire jelentkeztél.<br><br>"
+        f"{_event_details(e)}"
+    )
+    return base_email_template("Esemény emlékeztető", content)
 
 
 def event_unregister_admin_email(username: str, e) -> str:
