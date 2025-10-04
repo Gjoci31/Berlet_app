@@ -23,7 +23,7 @@ from ..email_templates import (
     registration_email,
     base_email_template,
 )
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -85,7 +85,7 @@ def approve_pass_request(request_id):
         return redirect(url_for('admin.pass_requests'))
 
     start = date.today()
-    end = start + timedelta(days=90)
+    end = date(2026, 6, 15)
     new_pass = Pass(
         type=pass_request.display_type,
         start_date=start,
