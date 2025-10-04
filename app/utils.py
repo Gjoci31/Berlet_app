@@ -71,33 +71,46 @@ def send_event_email(event, subject, default_html, to_email):
 
     if settings:
         mapping = {
-            'user_created': (settings.user_created_enabled, settings.user_created_text),
-            'user_deleted': (settings.user_deleted_enabled, settings.user_deleted_text),
-            'pass_created': (settings.pass_created_enabled, settings.pass_created_text),
-            'pass_deleted': (settings.pass_deleted_enabled, settings.pass_deleted_text),
-            'pass_used': (settings.pass_used_enabled, settings.pass_used_text),
+            'user_created': (settings.user_created_enabled, settings.user_created_text, 'prepend'),
+            'user_deleted': (settings.user_deleted_enabled, settings.user_deleted_text, 'prepend'),
+            'pass_created': (settings.pass_created_enabled, settings.pass_created_text, 'prepend'),
+            'pass_deleted': (settings.pass_deleted_enabled, settings.pass_deleted_text, 'prepend'),
+            'pass_used': (settings.pass_used_enabled, settings.pass_used_text, 'prepend'),
             'event_signup_user': (
                 settings.event_signup_user_enabled,
                 settings.event_signup_user_text,
+                'prepend',
             ),
             'event_signup_admin': (
                 settings.event_signup_admin_enabled,
                 settings.event_signup_admin_text,
+                'prepend',
             ),
             'event_unregister_user': (
                 settings.event_unregister_user_enabled,
                 settings.event_unregister_user_text,
+                'prepend',
             ),
             'event_unregister_admin': (
                 settings.event_unregister_admin_enabled,
                 settings.event_unregister_admin_text,
+                'prepend',
+            ),
+            'event_reminder': (
+                settings.event_reminder_enabled,
+                settings.event_reminder_text,
+                'append',
             ),
         }
-        enabled, custom_text = mapping.get(event, (False, None))
+        enabled, custom_text, order = mapping.get(event, (False, None, 'prepend'))
         if not enabled:
             return False
+        custom_text = (custom_text or '').strip()
         if custom_text:
-            combined = f"{custom_text}<br><br>{default_content}"
+            if order == 'append':
+                combined = f"{default_content}<br><br>{custom_text}"
+            else:
+                combined = f"{custom_text}<br><br>{default_content}"
             html = base_email_template(subject, combined)
         else:
             html = default_html

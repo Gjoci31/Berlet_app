@@ -136,6 +136,9 @@ class EmailSettingsForm(FlaskForm):
     event_unregister_admin_enabled = BooleanField('Leiratkozáskor (admin)')
     event_unregister_admin_text = TextAreaField('Admin leiratkoztatás üzenete')
 
+    event_reminder_enabled = BooleanField('Esemény emlékeztető (24 órával előtte)')
+    event_reminder_text = TextAreaField('Emlékeztető kiegészítő szövege')
+
     submit = SubmitField('Mentés')
 
 

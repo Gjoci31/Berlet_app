@@ -288,10 +288,18 @@ def unregister(event_id):
     if registration:
         late_cancel = _cancel_registration(registration)
         event = Event.query.get(event_id)
+        used_pass = registration.registration_type == 'pass'
+        deduction_kept = used_pass and (late_cancel or registration.pass_usage_id is not None)
         send_event_email(
             'event_unregister_user',
             'Esemény leiratkozás',
-            event_unregister_user_email(current_user.username, event),
+            event_unregister_user_email(
+                current_user.username,
+                event,
+                used_pass=used_pass,
+                late_cancel=late_cancel,
+                deduction_kept=deduction_kept,
+            ),
             current_user.email,
         )
         if late_cancel and registration.registration_type == 'pass':
