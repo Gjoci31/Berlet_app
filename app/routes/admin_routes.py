@@ -24,6 +24,7 @@ from ..models import (
 )
 from ..forms import PassForm, UserForm, EmailSettingsForm, RestoreForm
 from ..utils import send_email, send_event_email
+from .event_routes import _promote_waitlist
 from ..email_templates import (
     pass_created_email,
     pass_deleted_email,
@@ -353,6 +354,7 @@ def delete_user(user_id):
     # Remove the user from every event registration and restore pass usage
     # counters so related passes can be deleted cleanly afterwards.
     registrations = EventRegistration.query.filter_by(user_id=user.id).all()
+    affected_event_ids = {registration.event_id for registration in registrations}
     for registration in registrations:
         if registration.pass_usage_id:
             usage = PassUsage.query.get(registration.pass_usage_id)
@@ -376,6 +378,9 @@ def delete_user(user_id):
 
     db.session.delete(user)
     db.session.commit()
+
+    for event_id in affected_event_ids:
+        _promote_waitlist(event_id)
     send_event_email(
         'user_deleted',
         "Felhasználó törölve",
