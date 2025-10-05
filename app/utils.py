@@ -101,6 +101,11 @@ def send_event_email(event, subject, default_html, to_email):
                 settings.event_reminder_text,
                 'append',
             ),
+            'event_thank_you': (
+                settings.event_thank_you_enabled,
+                settings.event_thank_you_text,
+                'prepend',
+            ),
         }
         enabled, custom_text, order = mapping.get(event, (False, None, 'prepend'))
         if not enabled:

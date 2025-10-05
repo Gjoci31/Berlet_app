@@ -139,6 +139,9 @@ class EmailSettingsForm(FlaskForm):
     event_reminder_enabled = BooleanField('Esemény emlékeztető (24 órával előtte)')
     event_reminder_text = TextAreaField('Emlékeztető kiegészítő szövege')
 
+    event_thank_you_enabled = BooleanField('Esemény utáni köszönő üzenet')
+    event_thank_you_text = TextAreaField('Köszönő üzenet kiegészítő szövege')
+
     submit = SubmitField('Mentés')
 
 
