@@ -476,15 +476,15 @@ def add_user(event_id):
     user = User.query.get_or_404(user_id)
     event = Event.query.get_or_404(event_id)
 
-    if event.spots_left <= 0:
-        flash('Nincs szabad hely.', 'danger')
-        return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
-
     if EventRegistration.query.filter_by(
         event_id=event_id, user_id=user_id, status='active'
     ).first():
         flash('A felhasználó már jelentkezett.', 'warning')
         return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
+
+    waitlist_entry = EventWaitlist.query.filter_by(
+        event_id=event_id, user_id=user_id
+    ).first()
 
     selected_pass = None
     if registration_type == 'pass':
@@ -495,6 +495,26 @@ def add_user(event_id):
         if not selected_pass:
             flash('A felhasználónak nincs aktív bérlete.', 'danger')
             return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
+
+    if event.spots_left <= 0:
+        if waitlist_entry:
+            flash('A felhasználó már a várólistán van.', 'warning')
+        else:
+            entry_kwargs = {
+                'event_id': event_id,
+                'user_id': user_id,
+                'registration_type': 'pass' if selected_pass else 'single',
+            }
+            if selected_pass:
+                entry_kwargs['pass_id'] = selected_pass.id
+            waitlist_entry = EventWaitlist(**entry_kwargs)
+            db.session.add(waitlist_entry)
+            db.session.commit()
+            flash('Az esemény teltházas, a felhasználó a várólistára került.', 'info')
+        return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
+
+    if waitlist_entry:
+        db.session.delete(waitlist_entry)
 
     registration = EventRegistration(
         event_id=event_id,
