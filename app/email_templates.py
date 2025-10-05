@@ -183,6 +183,17 @@ def event_reminder_email(e) -> str:
     return base_email_template("Esemény emlékeztető", content)
 
 
+def event_thank_you_email(username: str, e) -> str:
+    """Return the thank you email sent after an event has finished."""
+    content = (
+        f"Kedves {username},<br><br>"
+        f"Köszönjük, hogy részt vettél a(z) {e.name} eseményen.<br>"
+        "Várunk vissza a következő alkalommal is!<br><br>"
+        f"{_event_details(e)}"
+    )
+    return base_email_template("Köszönjük a részvételt", content)
+
+
 def event_unregister_admin_email(username: str, e) -> str:
     """Return the email HTML when an admin removes a user from an event."""
     content = (

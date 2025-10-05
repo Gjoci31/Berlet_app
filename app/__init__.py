@@ -181,6 +181,18 @@ def create_app():
                         "ALTER TABLE email_settings ADD COLUMN event_reminder_text TEXT"
                     )
                 )
+            if 'event_thank_you_enabled' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN event_thank_you_enabled BOOLEAN DEFAULT 0"
+                    )
+                )
+            if 'event_thank_you_text' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE email_settings ADD COLUMN event_thank_you_text TEXT"
+                    )
+                )
             # Legacy weekly reminder columns are intentionally not created on new
             # installations now that the feature has been removed.
             insp.close()
@@ -198,6 +210,7 @@ def create_app():
                 'waitlist_promoted': "ALTER TABLE event_registration ADD COLUMN waitlist_promoted BOOLEAN DEFAULT 0",
                 'reminder_sent': "ALTER TABLE event_registration ADD COLUMN reminder_sent BOOLEAN DEFAULT 0",
                 'pass_deduction_notified': "ALTER TABLE event_registration ADD COLUMN pass_deduction_notified BOOLEAN DEFAULT 0",
+                'thank_you_sent': "ALTER TABLE event_registration ADD COLUMN thank_you_sent BOOLEAN DEFAULT 0",
             }
             for column_name, statement in registration_columns.items():
                 if column_name not in columns:

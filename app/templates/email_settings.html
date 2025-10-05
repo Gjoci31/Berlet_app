@@ -101,6 +101,14 @@
             {{ form.event_reminder_text.label(class="form-label") }}
             {{ form.event_reminder_text(class="form-control") }}
         </div>
+        <div class="form-check">
+            {{ form.event_thank_you_enabled(class="form-check-input") }}
+            {{ form.event_thank_you_enabled.label(class="form-check-label") }}
+        </div>
+        <div class="mb-3">
+            {{ form.event_thank_you_text.label(class="form-label") }}
+            {{ form.event_thank_you_text(class="form-control") }}
+        </div>
         {{ form.submit(class="btn btn-primary") }}
         <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Vissza</a>
     </form>
