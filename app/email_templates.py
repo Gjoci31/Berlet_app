@@ -121,6 +121,18 @@ def event_waitlist_join_email(username: str, e) -> str:
     return base_email_template("Várólista jelentkezés", content)
 
 
+def event_waitlist_removed_email(username: str, e) -> str:
+    """Return the email HTML when an admin removes a waitlist entry."""
+
+    content = (
+        f"Kedves {username},<br><br>"
+        "Az admin eltávolított a következő esemény várólistájáról:<br>"
+        f"{_event_details(e)}"
+        "<br><br>Ha további kérdésed van, lépj kapcsolatba velünk."
+    )
+    return base_email_template("Várólista eltávolítás", content)
+
+
 def event_signup_admin_email(username: str, e) -> str:
     content = (
         f"Kedves {username},<br><br>"

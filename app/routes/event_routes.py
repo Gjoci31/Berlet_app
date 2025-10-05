@@ -30,6 +30,7 @@ from ..email_templates import (
     event_unregister_user_email,
     event_unregister_admin_email,
     event_waitlist_join_email,
+    event_waitlist_removed_email,
 )
 
 
@@ -592,8 +593,15 @@ def remove_waitlist_entry(event_id, entry_id):
     if current_user.role != 'admin':
         return redirect(url_for('events.events'))
     entry = EventWaitlist.query.filter_by(id=entry_id, event_id=event_id).first_or_404()
+    event = entry.event
+    user = entry.user
     db.session.delete(entry)
     db.session.commit()
+    send_email(
+        'Várólista eltávolítás',
+        event_waitlist_removed_email(user.username, event),
+        user.email,
+    )
     flash('Várólista jelentkezés törölve.', 'success')
     return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
