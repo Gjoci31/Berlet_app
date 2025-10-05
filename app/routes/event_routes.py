@@ -276,6 +276,8 @@ def signup(event_id):
 @event_bp.route('/events/unregister/<int:event_id>', methods=['POST'])
 @login_required
 def unregister(event_id):
+    event = Event.query.get_or_404(event_id)
+
     registration = EventRegistration.query.filter_by(
         event_id=event_id, user_id=current_user.id, status='active'
     ).first()
@@ -287,9 +289,16 @@ def unregister(event_id):
         flash('Nem találtunk aktív jelentkezést.', 'warning')
         return redirect(url_for('events.events'))
 
+    now = datetime.utcnow()
+    if event.start_time <= now:
+        flash(
+            'Ez az esemény már elkezdődött vagy lezajlott, módosítás nem lehetséges.',
+            'warning',
+        )
+        return redirect(url_for('events.events'))
+
     if registration:
         late_cancel = _cancel_registration(registration)
-        event = Event.query.get(event_id)
         used_pass = registration.registration_type == 'pass'
         deduction_kept = used_pass and (late_cancel or registration.pass_usage_id is not None)
         send_event_email(
