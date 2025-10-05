@@ -580,10 +580,21 @@ def promote_waitlist(event_id, entry_id):
     entry = EventWaitlist.query.filter_by(id=entry_id, event_id=event_id).first_or_404()
     event = Event.query.get_or_404(event_id)
 
-    if _promote_waitlist_entry(entry, event, remove_on_fail=False):
-        flash('Felhasználó átsorolva az eseményre.', 'success')
-    else:
-        flash('Az átsorolás nem sikerült. Ellenőrizd a bérletet vagy a férőhelyeket.', 'danger')
+    first_entry = (
+        EventWaitlist.query.filter_by(event_id=event_id)
+        .order_by(EventWaitlist.created_at)
+        .first()
+    )
+
+    if not first_entry or first_entry.id == entry.id:
+        flash('A felhasználó már a várólista elején van.', 'info')
+        return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
+
+    earliest_time = first_entry.created_at or datetime.utcnow()
+    entry.created_at = earliest_time - timedelta(seconds=1)
+    db.session.commit()
+
+    flash('Felhasználó a várólista elejére került.', 'success')
     return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
 
