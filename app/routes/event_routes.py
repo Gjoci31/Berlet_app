@@ -23,12 +23,13 @@ from ..models import (
     db,
 )
 from ..forms import EventForm
-from ..utils import send_event_email
+from ..utils import send_email, send_event_email
 from ..email_templates import (
     event_signup_user_email,
     event_signup_admin_email,
     event_unregister_user_email,
     event_unregister_admin_email,
+    event_waitlist_join_email,
 )
 
 
@@ -362,6 +363,11 @@ def join_waitlist(event_id):
     waitlist_entry = EventWaitlist(**entry_kwargs)
     db.session.add(waitlist_entry)
     db.session.commit()
+    send_email(
+        'Várólista jelentkezés',
+        event_waitlist_join_email(current_user.username, event),
+        current_user.email,
+    )
     flash('Feliratkoztál a várólistára.', 'success')
     return redirect(url_for('events.events'))
 
