@@ -12,7 +12,16 @@ from flask_login import login_required, current_user
 import os
 import shutil
 
-from ..models import Pass, PassRequest, PassUsage, User, db, EmailSettings
+from ..models import (
+    Pass,
+    PassRequest,
+    PassUsage,
+    User,
+    db,
+    EmailSettings,
+    EventRegistration,
+    EventWaitlist,
+)
 from ..forms import PassForm, UserForm, EmailSettingsForm, RestoreForm
 from ..utils import send_email, send_event_email
 from ..email_templates import (
@@ -340,6 +349,30 @@ def delete_user(user_id):
     # Store details for the notification before the instance is removed
     username = user.username
     user_email = user.email
+
+    # Remove the user from every event registration and restore pass usage
+    # counters so related passes can be deleted cleanly afterwards.
+    registrations = EventRegistration.query.filter_by(user_id=user.id).all()
+    for registration in registrations:
+        if registration.pass_usage_id:
+            usage = PassUsage.query.get(registration.pass_usage_id)
+            if usage:
+                db.session.delete(usage)
+        if registration.registration_type == 'pass' and registration.pass_id:
+            related_pass = Pass.query.get(registration.pass_id)
+            if related_pass and related_pass.used > 0:
+                related_pass.used -= 1
+        db.session.delete(registration)
+
+    # Remove the user from all event waitlists.
+    waitlist_entries = EventWaitlist.query.filter_by(user_id=user.id).all()
+    for entry in waitlist_entries:
+        db.session.delete(entry)
+
+    # Delete every pass owned by the user (and their usages via cascade).
+    passes = Pass.query.filter_by(user_id=user.id).all()
+    for p in passes:
+        db.session.delete(p)
 
     db.session.delete(user)
     db.session.commit()
