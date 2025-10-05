@@ -92,10 +92,18 @@ def _event_details(e) -> str:
     )
 
 
-def event_signup_user_email(username: str, e) -> str:
+def event_signup_user_email(username: str, e, from_waitlist: bool = False) -> str:
+    if from_waitlist:
+        intro = (
+            "Felszabadult egy hely a várólistán szereplő eseményen, így automatikusan "
+            "átkerültél a résztvevők közé.<br>"
+        )
+    else:
+        intro = "Sikeresen jelentkeztél a következő eseményre:<br>"
+
     content = (
         f"Kedves {username},<br><br>"
-        f"Sikeresen jelentkeztél a következő eseményre:<br>"
+        f"{intro}"
         f"{_event_details(e)}"
     )
     return base_email_template("Esemény jelentkezés", content)
