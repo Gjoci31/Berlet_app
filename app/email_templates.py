@@ -109,6 +109,18 @@ def event_signup_user_email(username: str, e, from_waitlist: bool = False) -> st
     return base_email_template("Esemény jelentkezés", content)
 
 
+def event_waitlist_join_email(username: str, e) -> str:
+    """Return the email HTML confirming a waitlist registration."""
+
+    content = (
+        f"Kedves {username},<br><br>"
+        "Felkerültél a következő esemény várólistájára:<br>"
+        f"{_event_details(e)}"
+        "<br><br>Amint felszabadul egy hely, e-mailben értesítünk."
+    )
+    return base_email_template("Várólista jelentkezés", content)
+
+
 def event_signup_admin_email(username: str, e) -> str:
     content = (
         f"Kedves {username},<br><br>"
