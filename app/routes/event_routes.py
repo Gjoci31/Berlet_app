@@ -153,7 +153,7 @@ def _promote_waitlist_entry(entry, event=None, remove_on_fail=False):
     send_event_email(
         'event_signup_user',
         'Esemény jelentkezés',
-        event_signup_user_email(user.username, event),
+        event_signup_user_email(user.username, event, from_waitlist=True),
         user.email,
     )
     return True
