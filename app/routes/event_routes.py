@@ -516,6 +516,11 @@ def add_user(event_id):
             waitlist_entry = EventWaitlist(**entry_kwargs)
             db.session.add(waitlist_entry)
             db.session.commit()
+            send_email(
+                'Várólista jelentkezés',
+                event_waitlist_join_email(user.username, event),
+                user.email,
+            )
             flash('Az esemény teltházas, a felhasználó a várólistára került.', 'info')
         return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
