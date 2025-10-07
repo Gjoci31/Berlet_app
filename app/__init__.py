@@ -89,6 +89,17 @@ def create_app():
                         "ALTER TABLE user ADD COLUMN weekly_reminder_opt_in BOOLEAN DEFAULT 0"
                     )
                 )
+            # Older databases also pre-date the introduction of the
+            # ``is_blacklisted`` flag. Without the column every query against the
+            # ``user`` table raises ``sqlite3.OperationalError: no such column:
+            # user.is_blacklisted`` which prevented administrators from logging
+            # in. Ensure the column exists so role checks work reliably.
+            if 'is_blacklisted' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE user ADD COLUMN is_blacklisted BOOLEAN DEFAULT 0"
+                    )
+                )
             insp.close()
 
             insp = conn.execute(text("PRAGMA table_info(event)"))
