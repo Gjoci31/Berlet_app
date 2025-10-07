@@ -37,6 +37,64 @@ from datetime import date, datetime
 
 admin_bp = Blueprint('admin', __name__)
 
+
+@admin_bp.route('/blacklist')
+@login_required
+def blacklist():
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    users = User.query.order_by(User.username).all()
+    blacklisted_users = [user for user in users if user.is_blacklisted]
+    available_users = [
+        user for user in users if not user.is_blacklisted and user.role != 'admin'
+    ]
+
+    return render_template(
+        'blacklist.html',
+        blacklisted_users=blacklisted_users,
+        available_users=available_users,
+    )
+
+
+@admin_bp.route('/blacklist/add/<int:user_id>', methods=['POST'])
+@login_required
+def add_to_blacklist(user_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    if user.role == 'admin':
+        flash('Admin felhasználó nem helyezhető feketelistára.', 'warning')
+        return redirect(url_for('admin.blacklist'))
+
+    if not user.is_blacklisted:
+        user.is_blacklisted = True
+        db.session.commit()
+        flash(f'{user.username} feketelistára került.', 'success')
+    else:
+        flash(f'{user.username} már feketelistán van.', 'info')
+
+    return redirect(url_for('admin.blacklist'))
+
+
+@admin_bp.route('/blacklist/remove/<int:user_id>', methods=['POST'])
+@login_required
+def remove_from_blacklist(user_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    if user.is_blacklisted:
+        user.is_blacklisted = False
+        db.session.commit()
+        flash(f'{user.username} eltávolítva a feketelistáról.', 'success')
+    else:
+        flash(f'{user.username} nem szerepel a feketelistán.', 'info')
+
+    return redirect(url_for('admin.blacklist'))
+
+
 @admin_bp.route('/create_pass', methods=['GET', 'POST'])
 @login_required
 def create_pass():

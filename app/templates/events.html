@@ -34,6 +34,11 @@
             <h2 class="mb-0">Események</h2>
             <span class="badge bg-secondary ms-3">Várólistán: {{ waitlist_map|length }}</span>
         </div>
+        {% if user_blacklisted %}
+        <div class="alert alert-dark" role="alert">
+            Feketelistán szerepelsz, ezért nem tudsz új eseményre jelentkezni vagy várólistára feliratkozni.
+        </div>
+        {% endif %}
         <div class="row g-4">
             {% for event in events %}
             <div class="col-12 col-md-6 col-lg-4">
@@ -79,6 +84,10 @@
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button class="btn btn-outline-secondary w-100">Leiratkozás a várólistáról</button>
                                     </form>
+                                    {% elif user_blacklisted %}
+                                    <div class="alert alert-dark small" role="alert">
+                                        Nem jelentkezhetsz erre az eseményre, mert feketelistán vagy.
+                                    </div>
                                     {% elif event.spots_left > 0 %}
                                     <form method="post" action="{{ url_for('events.signup', event_id=event.id) }}" class="mb-2">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
