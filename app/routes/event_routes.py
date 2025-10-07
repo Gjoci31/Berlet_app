@@ -92,7 +92,7 @@ def _cancel_registration(registration, force_late=None):
     late_cancel = (
         force_late
         if force_late is not None
-        else (event.start_time - now <= timedelta(minutes=15))
+        else (event.start_time - now <= timedelta(minutes=1))
     )
     if registration.registration_type == 'pass' and registration.pass_id:
         selected_pass = Pass.query.get(registration.pass_id)
