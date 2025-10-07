@@ -127,6 +127,11 @@ def _promote_waitlist_entry(entry, event=None, remove_on_fail=False):
         return False
 
     user = entry.user
+    if user.is_blacklisted:
+        if remove_on_fail:
+            db.session.delete(entry)
+            db.session.commit()
+        return False
     selected_pass = None
     registration_type = entry.registration_type
     if event.is_final_event:
@@ -212,6 +217,7 @@ def events():
         latest_registrations=latest_registrations,
         waitlist_map=waitlist_map,
         has_active_pass=has_active_pass,
+        user_blacklisted=current_user.is_blacklisted,
     )
 
 
@@ -220,6 +226,9 @@ def events():
 def signup(event_id):
     event = Event.query.get_or_404(event_id)
     now = datetime.utcnow()
+    if current_user.is_blacklisted:
+        flash('Nem jelentkezhetsz eseményekre, mert feketelistán vagy.', 'danger')
+        return redirect(url_for('events.events'))
     if event.start_time <= now:
         flash('Ez az esemény már elkezdődött vagy lezajlott.', 'warning')
         return redirect(url_for('events.events'))
@@ -332,6 +341,9 @@ def join_waitlist(event_id):
     event = Event.query.get_or_404(event_id)
 
     now = datetime.utcnow()
+    if current_user.is_blacklisted:
+        flash('Nem csatlakozhatsz a várólistára, mert feketelistán vagy.', 'danger')
+        return redirect(url_for('events.events'))
     if event.start_time <= now:
         flash('Ez az esemény már elkezdődött vagy lezajlott.', 'warning')
         return redirect(url_for('events.events'))
@@ -491,6 +503,10 @@ def add_user(event_id):
     registration_type = request.form.get('registration_type', 'single')
     user = User.query.get_or_404(user_id)
     event = Event.query.get_or_404(event_id)
+
+    if user.is_blacklisted:
+        flash('A felhasználó feketelistán van, nem vehet részt az eseményen.', 'danger')
+        return redirect(url_for('events.admin_events', _anchor=f'event-{event_id}'))
 
     if EventRegistration.query.filter_by(
         event_id=event_id, user_id=user_id, status='active'

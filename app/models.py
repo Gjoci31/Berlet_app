@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     # required for the current application logic.
     password_plain = db.Column(db.String(150))
     role = db.Column(db.String(10), nullable=False, default='user')  # 'admin' or 'user'
+    is_blacklisted = db.Column(db.Boolean, nullable=False, default=False)
     # Delete associated passes when a user is removed so foreign key
     # constraints don't raise an ``IntegrityError``.
     passes = db.relationship(
