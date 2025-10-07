@@ -156,16 +156,12 @@ def event_unregister_user_email(
         f"{_event_details(e)}"
     )
     if used_pass:
-        if late_cancel:
-            interval_text = "48 órán belül"
-        else:
-            interval_text = "48 órán kívül"
         if deduction_kept:
             deduction_text = "Az alkalom levonva marad a bérletedből."
         else:
             deduction_text = "Az alkalmat visszaadtuk a bérletedhez."
         content += (
-            f"<br><br>A lemondás {interval_text} történt, ezért {deduction_text}"
+            f"<br><br>{deduction_text}"
         )
     else:
         content += (

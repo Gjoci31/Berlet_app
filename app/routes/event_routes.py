@@ -92,7 +92,7 @@ def _cancel_registration(registration, force_late=None):
     late_cancel = (
         force_late
         if force_late is not None
-        else (event.start_time - now <= timedelta(hours=48))
+        else (event.start_time - now <= timedelta(minutes=15))
     )
     if registration.registration_type == 'pass' and registration.pass_id:
         selected_pass = Pass.query.get(registration.pass_id)
@@ -314,7 +314,7 @@ def unregister(event_id):
             current_user.email,
         )
         if late_cancel and registration.registration_type == 'pass':
-            flash('48 órán belül mondtad le, az alkalom levonva marad.', 'warning')
+            flash('15 percen belül mondtad le, az alkalom levonva marad.', 'warning')
         else:
             flash('Jelentkezés törölve.', 'success')
         _promote_waitlist(event_id)
