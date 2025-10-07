@@ -314,7 +314,7 @@ def unregister(event_id):
             current_user.email,
         )
         if late_cancel and registration.registration_type == 'pass':
-            flash('15 percen belül mondtad le, az alkalom levonva marad.', 'warning')
+            flash('1 percen belül mondtad le, az alkalom levonva marad.', 'warning')
         else:
             flash('Jelentkezés törölve.', 'success')
         _promote_waitlist(event_id)
