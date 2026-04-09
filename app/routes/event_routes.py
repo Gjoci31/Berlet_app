@@ -44,7 +44,7 @@ def _get_available_pass(user, preferred_pass_id=None):
     valid = [
         p
         for p in passes
-        if p.start_date <= today <= p.end_date and p.used < p.total_uses
+        if p.start_date <= today <= p.end_date and _pass_has_bookable_use(p)
     ]
     if preferred_pass_id:
         for p in valid:
@@ -56,13 +56,25 @@ def _get_available_pass(user, preferred_pass_id=None):
     return None
 
 
-def _handle_pass_usage(selected_pass):
-    """Reserve one usage on the given pass and return the usage ID."""
-    selected_pass.used += 1
-    usage = PassUsage(pass_id=selected_pass.id)
-    db.session.add(usage)
-    db.session.flush()
-    return usage.id
+def _reserved_uses_for_pass(pass_id: int) -> int:
+    """Return how many upcoming active registrations reserve this pass."""
+    return (
+        EventRegistration.query.join(Event)
+        .filter(
+            EventRegistration.pass_id == pass_id,
+            EventRegistration.status == 'active',
+            EventRegistration.pass_usage_id.is_(None),
+            Event.start_time > datetime.utcnow(),
+        )
+        .count()
+    )
+
+
+def _pass_has_bookable_use(selected_pass) -> bool:
+    """Return whether the pass has at least one use left to reserve."""
+    reserved = _reserved_uses_for_pass(selected_pass.id)
+    remaining = selected_pass.total_uses - selected_pass.used - reserved
+    return remaining > 0
 
 
 def _uploads_dir() -> str:
@@ -152,7 +164,6 @@ def _promote_waitlist_entry(entry, event=None, remove_on_fail=False):
     )
     if selected_pass:
         registration.pass_id = selected_pass.id
-        registration.pass_usage_id = _handle_pass_usage(selected_pass)
     db.session.add(registration)
     db.session.delete(entry)
     db.session.commit()
@@ -268,7 +279,6 @@ def signup(event_id):
     )
     if selected_pass:
         registration.pass_id = selected_pass.id
-        registration.pass_usage_id = _handle_pass_usage(selected_pass)
     db.session.add(registration)
     db.session.commit()
 
@@ -305,11 +315,16 @@ def unregister(event_id):
             'warning',
         )
         return redirect(url_for('events.events'))
+    if registration and event.is_unregister_locked:
+        flash(
+            'A lejelentkezési határidő lejárt ennél az eseménynél.',
+            'warning',
+        )
+        return redirect(url_for('events.events'))
 
     if registration:
-        late_cancel = _cancel_registration(registration)
+        _cancel_registration(registration, force_late=False)
         used_pass = registration.registration_type == 'pass'
-        deduction_kept = used_pass and (late_cancel or registration.pass_usage_id is not None)
         send_event_email(
             'event_unregister_user',
             'Esemény leiratkozás',
@@ -317,15 +332,12 @@ def unregister(event_id):
                 current_user.username,
                 event,
                 used_pass=used_pass,
-                late_cancel=late_cancel,
-                deduction_kept=deduction_kept,
+                late_cancel=False,
+                deduction_kept=False,
             ),
             current_user.email,
         )
-        if late_cancel and registration.registration_type == 'pass':
-            flash('1 percen belül mondtad le, az alkalom levonva marad.', 'warning')
-        else:
-            flash('Jelentkezés törölve.', 'success')
+        flash('Jelentkezés törölve.', 'success')
         _promote_waitlist(event_id)
     else:
         db.session.delete(waitlist_entry)
@@ -430,6 +442,7 @@ def create_event():
             start_time=start_dt,
             end_time=end_dt,
             capacity=form.capacity.data,
+            unregister_deadline_minutes=form.unregister_deadline_minutes.data or 0,
             color=form.color.data,
             price=form.price.data if form.price.data is not None else None,
             is_final_event=form.is_final_event.data,
@@ -465,6 +478,7 @@ def edit_event(event_id):
         event.start_time = datetime.combine(form.date.data, form.start_time.data)
         event.end_time = datetime.combine(form.date.data, form.end_time.data)
         event.capacity = form.capacity.data
+        event.unregister_deadline_minutes = form.unregister_deadline_minutes.data or 0
         event.color = form.color.data
         event.price = form.price.data if form.price.data is not None else None
         event.is_final_event = form.is_final_event.data
@@ -560,7 +574,6 @@ def add_user(event_id):
     )
     if selected_pass:
         registration.pass_id = selected_pass.id
-        registration.pass_usage_id = _handle_pass_usage(selected_pass)
     db.session.add(registration)
     db.session.commit()
 

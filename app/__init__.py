@@ -128,6 +128,12 @@ def create_app():
                         "ALTER TABLE event ADD COLUMN is_final_event BOOLEAN DEFAULT 0"
                     )
                 )
+            if 'unregister_deadline_minutes' not in columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE event ADD COLUMN unregister_deadline_minutes INTEGER DEFAULT 0"
+                    )
+                )
             insp.close()
 
             insp = conn.execute(text("PRAGMA table_info(email_settings)"))

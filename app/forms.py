@@ -157,6 +157,11 @@ class EventForm(FlaskForm):
     start_time = TimeField('Kezdő időpont', validators=[DataRequired()])
     end_time = TimeField('Vég időpont', validators=[DataRequired()])
     capacity = IntegerField('Létszám', validators=[DataRequired(), NumberRange(min=1)])
+    unregister_deadline_minutes = IntegerField(
+        'Lejelentkezési tiltás kezdete (perc az esemény előtt)',
+        default=0,
+        validators=[DataRequired(), NumberRange(min=0)],
+    )
     price = DecimalField('Ár (HUF)', places=2, rounding=None, validators=[Optional(), NumberRange(min=0)])
     color = SelectField(
         'Szín',
@@ -185,4 +190,3 @@ class PurchasePassForm(FlaskForm):
         validators=[DataRequired()],
     )
     submit = SubmitField('Bérlet igénylése')
-

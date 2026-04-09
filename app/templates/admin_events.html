@@ -45,6 +45,9 @@
                             <div>
                                 <h5 class="card-title">{{ e.name }}{% if e.is_final_event %} <span class="badge bg-warning text-dark">Záró program</span>{% endif %}</h5>
                                 <p class="mb-1">{{ e.formatted_time }}</p>
+                                {% if e.unregister_deadline_minutes > 0 %}
+                                <p class="mb-1 small text-muted">Lejelentkezési határidő: {{ e.unregister_deadline.strftime('%Y-%m-%d %H:%M') }}</p>
+                                {% endif %}
                                 <p class="mb-1">Kapacitás: {{ e.spots_left }} / {{ e.capacity }}</p>
                                 {% if e.price is not none %}
                                 <p class="mb-1">Ár: {{ '{:,.0f}'.format(e.price).replace(',', ' ') }} Ft</p>
