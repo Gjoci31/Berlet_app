@@ -49,6 +49,11 @@
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">{{ event.name }}</h5>
                         <p class="card-text mb-1">{{ event.formatted_time }}</p>
+                        {% if event.unregister_deadline_minutes > 0 %}
+                        <p class="card-text mb-1 small text-muted">
+                            Lejelentkezés eddig: {{ event.unregister_deadline.strftime('%Y-%m-%d %H:%M') }}
+                        </p>
+                        {% endif %}
                         <p class="card-text mb-1">Szabad helyek: {{ event.spots_left }} / {{ event.capacity }}</p>
                         {% if event.price is not none %}
                         <p class="card-text mb-1">Ár: {{ '{:,.0f}'.format(event.price).replace(',', ' ') }} Ft</p>
@@ -65,10 +70,16 @@
                             {% endif %}
                             {% if active_reg %}
                                 {% if event.status == 'upcoming' %}
+                                    {% if event.is_unregister_locked %}
+                                    <div class="alert alert-warning small" role="alert">
+                                        A lejelentkezési határidő lejárt.
+                                    </div>
+                                    {% else %}
                                     <form method="post" action="{{ url_for('events.unregister', event_id=event.id) }}">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button class="btn btn-outline-danger w-100">Leiratkozom</button>
                                     </form>
+                                    {% endif %}
                                 {% else %}
                                     <div class="alert alert-secondary small" role="alert">
                                         Ez az esemény már zajlik vagy lezárult, leiratkozás nem lehetséges.

@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, login_manager
 
@@ -152,6 +152,7 @@ class Event(db.Model):
     price = db.Column(db.Numeric(10, 2))
     image_path = db.Column(db.String(255))
     is_final_event = db.Column(db.Boolean, nullable=False, default=False)
+    unregister_deadline_minutes = db.Column(db.Integer, nullable=False, default=0)
     registrations = db.relationship(
         'EventRegistration', backref='event', lazy=True, cascade='all, delete-orphan'
     )
@@ -206,6 +207,17 @@ class Event(db.Model):
             return "ongoing"
         return "upcoming"
 
+    @property
+    def unregister_deadline(self):
+        """Return the latest datetime when users can cancel registration."""
+        minutes = max(self.unregister_deadline_minutes or 0, 0)
+        return self.start_time - timedelta(minutes=minutes)
+
+    @property
+    def is_unregister_locked(self) -> bool:
+        """Return whether unregistering is already locked for regular users."""
+        return datetime.utcnow() >= self.unregister_deadline
+
 
 class EventRegistration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -242,5 +254,3 @@ class EventWaitlist(db.Model):
     __table_args__ = (
         db.UniqueConstraint('event_id', 'user_id', name='uq_event_waitlist_user'),
     )
-
-

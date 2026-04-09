@@ -10,8 +10,46 @@ from app.email_templates import (
     event_thank_you_email,
     pass_used_email,
 )
-from app.models import EmailSettings, Event, EventRegistration, Pass
+from app.models import EmailSettings, Event, EventRegistration, Pass, PassUsage, db
 from app.utils import send_event_email
+
+
+def process_event_start_pass_deductions(now: datetime) -> int:
+    """Deduct pass uses for active pass registrations once events start."""
+
+    registrations = (
+        EventRegistration.query.join(Event)
+        .filter(
+            EventRegistration.status == "active",
+            EventRegistration.registration_type == "pass",
+            EventRegistration.pass_id.isnot(None),
+            EventRegistration.pass_usage_id.is_(None),
+            Event.start_time <= now,
+        )
+        .all()
+    )
+
+    deducted = 0
+    for registration in registrations:
+        associated_pass = Pass.query.get(registration.pass_id)
+        if not associated_pass:
+            continue
+        if associated_pass.used >= associated_pass.total_uses:
+            logging.warning(
+                "Nincs szabad alkalom a bérleten (regisztráció id=%s, pass id=%s).",
+                registration.id,
+                associated_pass.id,
+            )
+            continue
+
+        associated_pass.used += 1
+        usage = PassUsage(pass_id=associated_pass.id)
+        db.session.add(usage)
+        db.session.flush()
+        registration.pass_usage_id = usage.id
+        deducted += 1
+
+    return deducted
 
 
 def send_event_reminders(now: datetime, settings: EmailSettings | None) -> int:
